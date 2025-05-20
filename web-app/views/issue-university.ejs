@@ -28,6 +28,11 @@
                 <h4 class="card-title mt-2">Issue Certificate</h4>
             </header>
             <article class="card-body">
+                <% if (typeof error !== 'undefined') { %>
+                    <div class="alert alert-danger" role="alert">
+                        <%= error %>
+                    </div>
+                <% } %>
 
                 <form action="/university/issue" method="POST">
                     <div class="form-row">
@@ -66,8 +71,8 @@
                     </div> <!-- form-group// -->
                 </form>
             </article> <!-- card-body end .// -->
+        </div> <!-- card.// -->
     </div> <!-- col.//-->
-
 </div> <!-- row.//-->
 
 

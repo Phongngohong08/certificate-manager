@@ -4,6 +4,7 @@ const SHA256 = require('crypto-js/sha256');
 const chaincode = require('./fabric/chaincode');
 const walletUtil = require('./fabric/wallet-utils');
 const certificates = require('../database/models/certificates');
+const logger = require('../utils/logger');
 
 let ecdsa = new jsrs.ECDSA({'curve': 'secp256r1'});
 
@@ -14,22 +15,39 @@ let ecdsa = new jsrs.ECDSA({'curve': 'secp256r1'});
  * @returns {Promise<MerkleTree>}
  */
 async function generateMerkleTree(certData) {
-    let certSchema = await chaincode.invokeChaincode("queryCertificateSchema",
-        ["v1"], true, certData.universityEmail);
+    try {
+        logger.debug(`Attempting to fetch certificate schema for university: ${certData.universityEmail}`);
+        let certSchema = await chaincode.invokeChaincode("queryCertificateSchema",
+            ["v1"], true, certData.universityEmail);
 
-    let certDataArray = [];
+        if (!certSchema || !certSchema.ordering) {
+            throw new Error("Invalid certificate schema returned from blockchain");
+        }
 
-    //certSchema used to order the certificate elements appropriately.
-    //ordering[i] = key of i'th item that should go in the certificate array.
-    for (let i = 0; i < certSchema.ordering.length ; i++) {
-        let itemKey = certSchema.ordering[i];
-        certDataArray.push(certData[itemKey]);
+        logger.debug(`Successfully fetched schema with ordering: ${certSchema.ordering.join(', ')}`);
+        let certDataArray = [];
+
+        //certSchema used to order the certificate elements appropriately.
+        //ordering[i] = key of i'th item that should go in the certificate array.
+        for (let i = 0; i < certSchema.ordering.length ; i++) {
+            let itemKey = certSchema.ordering[i];
+            if (!certData[itemKey]) {
+                throw new Error(`Missing required field '${itemKey}' in certificate data`);
+            }
+            certDataArray.push(certData[itemKey]);
+        }
+
+        logger.debug(`Generated certificate data array with ${certDataArray.length} elements`);
+        const mTreeLeaves = certDataArray.map(x => SHA256(x));
+        const mTree = new MerkleTree(mTreeLeaves, SHA256);
+
+        logger.debug('Successfully generated Merkle tree');
+        return mTree;
+    } catch (error) {
+        logger.error(`Error generating Merkle tree: ${error.message}`);
+        logger.error(`Stack trace: ${error.stack}`);
+        throw error;
     }
-
-    const mTreeLeaves = certDataArray.map(x => SHA256(x));
-    const mTree = new MerkleTree(mTreeLeaves, SHA256);
-
-    return mTree;
 }
 
 /**

@@ -80,26 +80,81 @@ async function logOutAndRedirect (req, res, next) {
 
 async function postIssueCertificate(req,res,next) {
     try {
+        logger.info(`Starting certificate issuance request for student: ${req.body.studentEmail}`);
+        
+        // Validate required fields
+        const requiredFields = ['studentEmail', 'studentName', 'major', 'department', 'cgpa', 'date'];
+        const missingFields = requiredFields.filter(field => !req.body[field]);
+        
+        if (missingFields.length > 0) {
+            logger.error(`Missing required fields: ${missingFields.join(', ')}`);
+            return res.status(400).render("issue-university", { 
+                title, 
+                root,
+                error: `Missing required fields: ${missingFields.join(', ')}`,
+                logInType: req.session.user_type || "none"
+            });
+        }
+
+        // Validate session
+        if (!req.session.name || !req.session.email) {
+            logger.error('University session data missing');
+            return res.status(401).render("issue-university", { 
+                title, 
+                root,
+                error: "Please log in as a university to issue certificates",
+                logInType: req.session.user_type || "none"
+            });
+        }
+
         let certData = {
             studentEmail: req.body.studentEmail,
             studentName: req.body.studentName,
             universityName: req.session.name,
             universityEmail: req.session.email,
             major: req.body.major,
-            departmentName:  req.body.department,
+            departmentName: req.body.department,
             cgpa: req.body.cgpa,
             dateOfIssuing: req.body.date,
         };
 
+        logger.debug('Certificate data prepared:', certData);
+
         let serviceResponse = await universityService.issueCertificate(certData);
 
         if(serviceResponse) {
-            res.render("issue-success", { title, root,
-                logInType: req.session.user_type || "none"});
+            logger.info(`Certificate issued successfully for student: ${req.body.studentEmail}`);
+            res.render("issue-success", { 
+                title, 
+                root,
+                logInType: req.session.user_type || "none"
+            });
         }
 
     } catch (e) {
-        logger.error(e);
+        logger.error(`Error in postIssueCertificate: ${e.message}`);
+        logger.error(`Stack trace: ${e.stack}`);
+        
+        // Handle specific error cases
+        if (e.message.includes("Schema v1 does not exist")) {
+            return res.status(500).render("issue-university", { 
+                title, 
+                root,
+                error: "The certificate schema is not initialized. Please contact the system administrator.",
+                logInType: req.session.user_type || "none"
+            });
+        }
+        
+        if (e.message.includes("Could not fetch student profile")) {
+            return res.status(400).render("issue-university", { 
+                title, 
+                root,
+                error: "The student is not registered in the system. Please ensure the student email is correct.",
+                logInType: req.session.user_type || "none"
+            });
+        }
+
+        // Generic error handling
         next(e);
     }
 }

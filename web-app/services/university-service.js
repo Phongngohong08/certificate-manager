@@ -13,28 +13,67 @@ const certificateService = require('./certificate-service');
  * @returns {Promise<{}>}
  */
 async function issueCertificate(certData) {
+    try {
+        logger.info(`Starting certificate issuance process for student: ${certData.studentEmail}`);
+        
+        // Validate university
+        let universityObj = await universities.findOne({"email": certData.universityEmail});
+        if (!universityObj) {
+            logger.error(`University not found with email: ${certData.universityEmail}`);
+            throw new Error("Could not fetch university profile. Please ensure the university is registered.");
+        }
+        logger.debug(`Found university: ${universityObj.name}`);
 
-    let universityObj = await universities.findOne({"email": certData.universityEmail});
-    let studentObj = await students.findOne({"email": certData.studentEmail});
+        // Validate student
+        let studentObj = await students.findOne({"email": certData.studentEmail});
+        if (!studentObj) {
+            logger.error(`Student not found with email: ${certData.studentEmail}`);
+            throw new Error("Could not fetch student profile. Please ensure the student is registered.");
+        }
+        logger.debug(`Found student: ${studentObj.name}`);
 
-    if (!studentObj) throw new Error("Could not fetch student profile. Provide valid student email.");
-    if (!universityObj) throw new Error("Could not fetch university profile.");
+        // Create certificate model
+        let certDBModel = new certificates(certData);
+        logger.debug('Created certificate database model');
 
-    let certDBModel = new certificates(certData);
+        // Generate Merkle tree hash
+        logger.debug('Generating Merkle tree hash...');
+        let mTreeHash = await encryption.generateMerkleRoot(certDBModel);
+        logger.debug('Merkle tree hash generated successfully');
 
-    let mTreeHash =  await encryption.generateMerkleRoot(certDBModel);
-    let universitySignature = await encryption.createDigitalSignature(mTreeHash, certData.universityEmail);
-    let studentSignature = await encryption.createDigitalSignature(mTreeHash, certData.studentEmail);
+        // Generate signatures
+        logger.debug('Generating university signature...');
+        let universitySignature = await encryption.createDigitalSignature(mTreeHash, certData.universityEmail);
+        logger.debug('University signature generated successfully');
 
-    let chaincodeResult = await chaincode.invokeChaincode("issueCertificate",
-        [mTreeHash, universitySignature, studentSignature, certData.dateOfIssuing, certDBModel._id, universityObj.publicKey, studentObj.publicKey ], false, certData.universityEmail);
+        logger.debug('Generating student signature...');
+        let studentSignature = await encryption.createDigitalSignature(mTreeHash, certData.studentEmail);
+        logger.debug('Student signature generated successfully');
 
-    logger.debug(chaincodeResult);
+        // Issue certificate on blockchain
+        logger.debug('Issuing certificate on blockchain...');
+        let chaincodeResult = await chaincode.invokeChaincode("issueCertificate",
+            [mTreeHash, universitySignature, studentSignature, certData.dateOfIssuing, certDBModel._id, universityObj.publicKey, studentObj.publicKey], 
+            false, 
+            certData.universityEmail);
+        logger.debug(`Certificate issued on blockchain: ${JSON.stringify(chaincodeResult)}`);
 
-    let res = await certDBModel.save();
-    if(!res) throw new Error("Could not create certificate in the database");
+        // Save to database
+        logger.debug('Saving certificate to database...');
+        let res = await certDBModel.save();
+        if (!res) {
+            logger.error('Failed to save certificate to database');
+            throw new Error("Could not create certificate in the database");
+        }
+        logger.debug('Certificate saved to database successfully');
 
-    return true; //If no errors were thrown, everything completed successfully.
+        logger.info(`Certificate issuance completed successfully for student: ${certData.studentEmail}`);
+        return true;
+    } catch (error) {
+        logger.error(`Error in issueCertificate: ${error.message}`);
+        logger.error(`Stack trace: ${error.stack}`);
+        throw error;
+    }
 }
 
 /**

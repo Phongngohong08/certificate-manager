@@ -49,6 +49,8 @@ sudo usermod -aG docker $USER
 ```
 
 ## Cài đặt và chạy dự án
+### Nên chạy test fabric-samples trước
+`https://github.com/Phongngohong08/hyperledger-fabric/blob/main/README_Fabric_Samples.md`
 
 ### 1. Clone repository
 ```bash

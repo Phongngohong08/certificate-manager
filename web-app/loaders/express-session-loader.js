@@ -13,7 +13,7 @@ let expessSessionConfig = {
         maxAge:  86400000
     },
     store: MongoStore.create({
-        mongoUrl: config.mongoUri,
+        mongoUrl: config.mongodbURI,
         collection: "session"
     })
 };

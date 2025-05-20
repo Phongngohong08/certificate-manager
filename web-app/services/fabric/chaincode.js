@@ -30,6 +30,7 @@ async function connectToNetwork(userEmail) {
 
         let ccp = JSON.parse(fs.readFileSync(config.fabric.ccpPath, 'utf8'));
         logger.debug('Successfully loaded connection profile');
+        logger.debug(`CCP content: ${JSON.stringify(ccp, null, 2)}`);
 
         // Check if wallet directory exists
         if (!fs.existsSync(config.fabric.walletPath)) {
@@ -47,17 +48,29 @@ async function connectToNetwork(userEmail) {
             throw new Error(`An identity for the user with ${userEmail} does not exist in the wallet`);
         }
         logger.info(`Found identity for user: ${userEmail}`);
+        logger.debug(`Identity content: ${JSON.stringify(identity, null, 2)}`);
 
         const gateway = new Gateway();
         logger.info('Connecting to gateway...');
-        await gateway.connect(ccp, { 
-            wallet, 
-            identity: userEmail, 
-            discovery: { 
-                enabled: true, 
-                asLocalhost: true 
+        
+        // Enhanced connection options
+        const connectionOptions = {
+            wallet,
+            identity: userEmail,
+            discovery: {
+                enabled: true,
+                asLocalhost: true
+            },
+            clientTlsIdentity: userEmail,
+            eventHandlerOptions: {
+                commitTimeout: 300,
+                strategy: null
             }
-        });
+        };
+        
+        logger.debug(`Connection options: ${JSON.stringify(connectionOptions, null, 2)}`);
+        
+        await gateway.connect(ccp, connectionOptions);
         logger.info('Successfully connected to gateway');
 
         logger.info(`Getting network for channel: ${config.fabric.channelName}`);
@@ -74,6 +87,16 @@ async function connectToNetwork(userEmail) {
     } catch (error) {
         logger.error(`Failed to connect to network: ${error}`);
         logger.error(`Stack trace: ${error.stack}`);
+        
+        // Additional error details
+        if (error.message.includes('access denied')) {
+            logger.error('Access denied error detected. Possible causes:');
+            logger.error('1. User does not have proper MSP (Membership Service Provider) configuration');
+            logger.error('2. User is not a member of the channel');
+            logger.error('3. User does not have proper channel access policies');
+            logger.error('4. Channel configuration is incorrect');
+        }
+        
         throw error;
     }
 }

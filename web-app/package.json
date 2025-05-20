@@ -7,7 +7,8 @@
     "start-development": "cross-env NODE_ENV=development node -r dotenv/config ./bin/www",
     "start-production": "cross-env NODE_ENV=production node -r dotenv/config ./bin/www",
     "dev": "nodemon -e js,ejs,css,html -r dotenv/config ./bin/www",
-    "test": "cross-env NODE_ENV=development node -r dotenv/config ./playground/test.js"
+    "test": "cross-env NODE_ENV=development node -r dotenv/config ./playground/test.js",
+    "join-channel": "cross-env NODE_ENV=development node -r dotenv/config ./scripts/join-channel.js"
   },
   "dependencies": {
     "app-root-path": "^3.1.0",

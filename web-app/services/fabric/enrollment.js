@@ -72,8 +72,15 @@ async function registerUser(email) {
         // Check to see if we've already enrolled the user.
         const userIdentity = await wallet.get(email);
         if (userIdentity) {
-            logger.info(`User ${email} already exists in wallet, skipping registration`);
-            return userIdentity;
+            logger.info(`User ${email} already exists in wallet, loading keys...`);
+            // Load the hex keys from the wallet file
+            const hexKeys = walletUtils.loadHexKeysFromWallet(email);
+            if (!hexKeys || !hexKeys.publicKey) {
+                logger.error(`Failed to load hex keys for existing user ${email}`);
+                throw Error('Failed to load hex keys for existing user');
+            }
+            logger.info(`Successfully loaded keys for existing user ${email}`);
+            return hexKeys;
         }
 
         // Check to see if we've already enrolled the admin user.

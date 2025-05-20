@@ -11,8 +11,14 @@ let root = "university";
 
 async function postRegisterUniversity(req, res, next) {
     try {
+        logger.info(`Starting university registration process for email: ${req.body.email}`);
+        
+        logger.debug('Generating fabric enrollment keys...');
         let keys = await fabricEnrollment.registerUser(req.body.email);
+        logger.debug('Fabric enrollment keys generated successfully');
+        
         let location = req.body.location + `, ${req.body.country}`;
+        logger.debug(`Creating university record in database with location: ${location}`);
 
         let dbResponse = await universities.create({
             name : req.body.name,
@@ -22,16 +28,19 @@ async function postRegisterUniversity(req, res, next) {
             password: req.body.password,
             publicKey: keys.publicKey
         });
+        logger.debug('University record created in database successfully');
 
+        logger.debug('Registering university on blockchain...');
         let result = await chaincode.invokeChaincode("registerUniversity",
             [ req.body.name, keys.publicKey, location, req.body.description], false, req.body.email);
-        logger.debug(`University Registered. Ledger profile: ${result}`);
+        logger.info(`University registration completed successfully. Ledger profile: ${result}`);
 
         res.render("register-success", { title, root,
             logInType: req.session.user_type || "none"});
     }
     catch (e) {
-        logger.error(e);
+        logger.error(`Error during university registration: ${e.message}`);
+        logger.error(`Stack trace: ${e.stack}`);
         next(e);
     }
 }

@@ -10,21 +10,27 @@ let root = "student";
 
 async function postRegisterStudent(req, res, next) {
     try {
+        logger.info(`Starting student registration process for email: ${req.body.email}`);
+        
+        logger.debug('Generating fabric enrollment keys...');
         let keys = await fabricEnrollment.registerUser(req.body.email);
+        logger.debug('Fabric enrollment keys generated successfully');
 
+        logger.debug('Creating student record in database...');
         let dbResponse = await students.create({
             name : req.body.name,
             email: req.body.email,
             password: req.body.password,
             publicKey: keys.publicKey
         });
-
+        logger.info('Student registration completed successfully');
 
         res.render("register-success", { title, root,
             logInType: req.session.user_type || "none"});
     }
     catch (e) {
-        logger.error(e);
+        logger.error(`Error during student registration: ${e.message}`);
+        logger.error(`Stack trace: ${e.stack}`);
         next(e);
     }
 }

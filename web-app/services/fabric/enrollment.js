@@ -28,10 +28,11 @@ async function enrollAdmin() {
         // Create a new file system based wallet for managing identities.
         const wallet = await Wallets.newFileSystemWallet(config.fabric.walletPath);
 
-        const identity = await wallet.get('admin');
-        if (identity) {
-            logger.info('An identity for the admin user "admin" already exists in the wallet.');
-            return;
+        // Remove existing admin identity if it exists
+        const existingIdentity = await wallet.get('admin');
+        if (existingIdentity) {
+            await wallet.remove('admin');
+            logger.info('Removed existing admin identity from wallet');
         }
 
         // Enroll the admin user, and import the new identity into the wallet.
@@ -71,13 +72,19 @@ async function registerUser(email) {
         // Check to see if we've already enrolled the user.
         const userIdentity = await wallet.get(email);
         if (userIdentity) {
-            throw Error(`An identity for the user ${email} already exists in the wallet`);
+            logger.info(`User ${email} already exists in wallet, skipping registration`);
+            return userIdentity;
         }
 
         // Check to see if we've already enrolled the admin user.
-        const adminIdentity = await wallet.get('admin');
+        let adminIdentity = await wallet.get('admin');
         if (!adminIdentity) {
-            throw Error('An identity for the admin user "admin" does not exist in the wallet. Please run enrollAdmin first.');
+            logger.info('Admin identity not found, attempting to enroll admin...');
+            await enrollAdmin();
+            adminIdentity = await wallet.get('admin');
+            if (!adminIdentity) {
+                throw Error('Failed to enroll admin user. Please check CA server configuration.');
+            }
         }
 
         // build a user object for authenticating with the CA
@@ -85,11 +92,19 @@ async function registerUser(email) {
         const adminUser = await provider.getUserContext(adminIdentity, 'admin');
         
         if (!adminUser) {
-            throw Error('Failed to get admin user context. Please ensure admin is properly enrolled.');
+            logger.info('Admin context not found, attempting to re-enroll admin...');
+            await enrollAdmin();
+            adminIdentity = await wallet.get('admin');
+            const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
+            adminUser = await provider.getUserContext(adminIdentity, 'admin');
+            
+            if (!adminUser) {
+                throw Error('Failed to get admin user context after re-enrollment. Please check CA server configuration.');
+            }
         }
 
-        // Register the user, enroll the user, and import the new identity into the wallet.
-        const secret = await ca.register({
+        // Register the user
+        const registerRequest = {
             affiliation: 'org1.department1',
             enrollmentID: email,
             role: 'client',
@@ -99,12 +114,18 @@ async function registerUser(email) {
                 { name: 'hf.Revoker', value: 'true' },
                 { name: 'hf.IntermediateCA', value: 'true' }
             ]
-        }, adminUser);
+        };
+
+        logger.info(`Registering user ${email}`);
+
+        // Register the user
+        const secret = await ca.register(registerRequest, adminUser);
 
         if (!secret) {
             throw Error('Failed to get enrollment secret from CA');
         }
 
+        // Enroll the user with the secret
         const enrollment = await ca.enroll({
             enrollmentID: email,
             enrollmentSecret: secret,
@@ -119,6 +140,9 @@ async function registerUser(email) {
         return userKeys;
     } catch (error) {
         logger.error(`Failed to register user ${email}: ${error}`);
+        if (error.message.includes('Authentication failure')) {
+            logger.error('Authentication failure detected. Please check CA server configuration and admin credentials.');
+        }
         throw error;
     }
 }

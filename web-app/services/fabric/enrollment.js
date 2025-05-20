@@ -77,12 +77,16 @@ async function registerUser(email) {
         // Check to see if we've already enrolled the admin user.
         const adminIdentity = await wallet.get('admin');
         if (!adminIdentity) {
-            throw Error('An identity for the admin user "admin" does not exist in the wallet');
+            throw Error('An identity for the admin user "admin" does not exist in the wallet. Please run enrollAdmin first.');
         }
 
         // build a user object for authenticating with the CA
         const provider = wallet.getProviderRegistry().getProvider(adminIdentity.type);
         const adminUser = await provider.getUserContext(adminIdentity, 'admin');
+        
+        if (!adminUser) {
+            throw Error('Failed to get admin user context. Please ensure admin is properly enrolled.');
+        }
 
         // Register the user, enroll the user, and import the new identity into the wallet.
         const secret = await ca.register({
@@ -96,6 +100,10 @@ async function registerUser(email) {
                 { name: 'hf.IntermediateCA', value: 'true' }
             ]
         }, adminUser);
+
+        if (!secret) {
+            throw Error('Failed to get enrollment secret from CA');
+        }
 
         const enrollment = await ca.enroll({
             enrollmentID: email,

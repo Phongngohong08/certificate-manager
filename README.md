@@ -101,7 +101,6 @@ FABRIC_CHAINCODE_NAME=academic-certificates
 # Chạy ở chế độ development
 npm run start-development
 ```
-
 Ứng dụng sẽ chạy tại địa chỉ: http://localhost:3000
 
 ## Cấu trúc dự án

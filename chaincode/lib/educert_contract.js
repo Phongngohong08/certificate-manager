@@ -6,8 +6,10 @@ const Certificate = require('./certificate');
 const UniversityProfile = require('./university_profile');
 const Schema = require('./schema');
 
-
 class EducertContract extends Contract {
+    constructor() {
+        super('EducertContract');
+    }
 
     /**
      * Initialize the ledger. 

@@ -22,8 +22,7 @@ async function enrollAdmin() {
         const caTLSCACerts = caInfo.tlsCACerts.pem;
         const ca = new FabricCAServices(caInfo.url, { 
             trustedRoots: caTLSCACerts, 
-            verify: false,
-            timeout: 30000
+            verify: false 
         }, caInfo.caName);
 
         // Create a new file system based wallet for managing identities.
@@ -38,11 +37,7 @@ async function enrollAdmin() {
         // Enroll the admin user, and import the new identity into the wallet.
         const enrollment = await ca.enroll({ 
             enrollmentID: 'admin', 
-            enrollmentSecret: 'adminpw',
-            attr_reqs: [
-                { name: 'hf.Registrar.Roles', optional: false },
-                { name: 'hf.Registrar.Attributes', optional: false }
-            ]
+            enrollmentSecret: 'adminpw'
         });
         
         let adminKeys = await walletUtils.createNewWalletEntity(enrollment, "admin");

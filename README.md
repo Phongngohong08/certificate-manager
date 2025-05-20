@@ -25,7 +25,7 @@ sudo apt-get install -y nodejs
 # Windows: Tải và cài đặt từ https://www.mongodb.com/try/download/community
 # Ubuntu/Debian:
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
+echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
 sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl start mongod
@@ -47,8 +47,8 @@ sudo usermod -aG docker $USER
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/your-username/blockchain-academic-certificates.git
-cd blockchain-academic-certificates
+git clone https://github.com/your-username/certificate-manager.git
+cd certificate-manager
 ```
 
 ### 2. Khởi động mạng Fabric
@@ -56,18 +56,20 @@ cd blockchain-academic-certificates
 # Di chuyển đến thư mục test-network của Fabric
 cd fabric-samples/test-network
 
+./network.sh down
+
 # Khởi động mạng với CouchDB
 ./network.sh up createChannel -ca -c mychannel -s couchdb
 
 # Cài đặt và khởi tạo chaincode
-./network.sh deployCC -ccn academic-certificates -ccp ../../blockchain-academic-certificates/chaincode -ccl javascript
+./network.sh deployCC -ccn academic-certificates -ccp ../../certificate-manager/chaincode -ccl javascript
 ```
 
 ### 3. Cài đặt và chạy ứng dụng web
 
 ```bash
 # Di chuyển đến thư mục web-app
-cd ../../blockchain-academic-certificates/web-app
+cd ../../certificate-manager/web-app
 
 # Cài đặt dependencies
 npm install

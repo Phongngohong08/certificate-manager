@@ -1,4 +1,4 @@
-//Import Hyperledger Fabric 2.5.13 programming model - fabric-network
+//Import Hyperledger Fabric 2.2.19 programming model - fabric-network
 'use strict';
 
 const { Gateway, Wallets } = require('fabric-network');
@@ -33,11 +33,6 @@ async function connectToNetwork(userEmail) {
             discovery: { 
                 enabled: true, 
                 asLocalhost: true 
-            },
-            clientTlsIdentity: userEmail,
-            eventHandlerOptions: {
-                commitTimeout: 300,
-                strategy: 'MSPID_SCOPE_ANYFORTX'
             }
         });
 

@@ -18,8 +18,8 @@
     "author": "emali",
     "dependencies": {
         "crypto-js": "^4.2.0",
-        "fabric-contract-api": "^2.5.13",
-        "fabric-shim": "^2.5.13",
+        "fabric-contract-api": "^2.2.19",
+        "fabric-shim": "^2.2.19",
         "jsrsasign": "^10.9.0",
         "merkletreejs": "^0.3.11"
     },

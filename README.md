@@ -1,28 +1,30 @@
 # Blockchain Academic Certificates
 
-Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric 2.5.13.
+Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric 2.2.19.
 
 ## Yêu cầu hệ thống
 
 - Node.js phiên bản 20.x trở lên
 - MongoDB phiên bản 6.0 trở lên
 - Docker và Docker Compose
-- Hyperledger Fabric 2.5.13 (đã cài đặt)
+- Hyperledger Fabric 2.2.19
 - Go phiên bản 1.20 trở lên
 
 ## Cài đặt các công cụ cần thiết
 
 ### 1. Cài đặt Node.js và npm
 ```bash
-# Windows: Tải và cài đặt từ https://nodejs.org/
 # Ubuntu/Debian:
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+\. "$HOME/.nvm/nvm.sh"
+nvm install 22
+node -v
+nvm current
+npm -v
 ```
 
 ### 2. Cài đặt MongoDB
 ```bash
-# Windows: Tải và cài đặt từ https://www.mongodb.com/try/download/community
 # Ubuntu/Debian:
 wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
 echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
@@ -30,11 +32,14 @@ sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl start mongod
 sudo systemctl enable mongod
+
+# Có thể tạo database ở bước này
+mongosh
+use blockchaincertificate (show dbs nếu không thấy phải tạo tay 1 bản ghi)
 ```
 
 ### 3. Cài đặt Docker và Docker Compose
 ```bash
-# Windows: Tải và cài đặt từ https://www.docker.com/products/docker-desktop
 # Ubuntu/Debian:
 sudo apt-get update
 sudo apt-get install -y docker.io docker-compose
@@ -47,7 +52,7 @@ sudo usermod -aG docker $USER
 
 ### 1. Clone repository
 ```bash
-git clone https://github.com/your-username/certificate-manager.git
+https://github.com/Phongngohong08/certificate-manager.git
 cd certificate-manager
 ```
 
@@ -56,10 +61,11 @@ cd certificate-manager
 # Di chuyển đến thư mục test-network của Fabric
 cd fabric-samples/test-network
 
+# Dọn dẹp mạng cũ
 ./network.sh down
 
-# Khởi động mạng với CouchDB
-./network.sh up createChannel -ca -c mychannel -s couchdb
+# Khởi động mạng với Leveldb
+./network.sh up createChannel -ca
 
 # Cài đặt và khởi tạo chaincode
 ./network.sh deployCC -ccn academic-certificates -ccp ../../certificate-manager/chaincode -ccl javascript
@@ -79,13 +85,13 @@ npm install --only=dev
 touch .env
 ```
 
-Thêm các biến môi trường sau vào file `.env`:
+Thêm các biến môi trường sau vào file `.env` (nhớ thay đổi ccp_path):
 ```env
 MONGODB_URI_LOCAL=mongodb://localhost:27017/blockchaincertificate
 PORT=3000
 LOG_LEVEL=info
 EXPRESS_SESSION_SECRET=your-secret-key-here
-CCP_PATH=/path/to/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json
+CCP_PATH=/home/phongnh/go/src/github.com/Phongngohong08/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json
 FABRIC_CHANNEL_NAME=mychannel
 FABRIC_CHAINCODE_NAME=academic-certificates
 ```

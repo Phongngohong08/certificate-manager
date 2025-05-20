@@ -11,34 +11,49 @@ const logger = require('../logger');
  * @returns {Promise<{} | Error>} public and private key in hex format;
  */
 async function createNewWalletEntity(enrollmentObject, userName) {
-    const wallet = await Wallets.newFileSystemWallet(config.fabric.walletPath);
+    try {
+        logger.debug('Starting wallet entity creation...');
+        const wallet = await Wallets.newFileSystemWallet(config.fabric.walletPath);
 
-    const x509Identity = {
-        credentials: {
-            certificate: enrollmentObject.certificate,
-            privateKey: enrollmentObject.key.toBytes(),
+        logger.debug('Creating X509 identity...');
+        const x509Identity = {
+            credentials: {
+                certificate: enrollmentObject.certificate,
+                privateKey: enrollmentObject.key.toBytes(),
+            },
+            mspId: 'Org1MSP',
+            type: 'X.509',
+        };
 
-        },
-        mspId: 'Org1MSP',
-        type: 'X.509',
-    };
+        logger.debug('Creating hex key entity...');
+        let hexKeyEntity = {
+            publicKey: enrollmentObject.key._key.pubKeyHex,
+            privateKey: enrollmentObject.key._key.prvKeyHex,
+            userName: userName
+        };
 
+        logger.debug(`Hex key entity created: ${JSON.stringify(hexKeyEntity)}`);
 
-    let hexKeyEntity = {
-        publicKey: enrollmentObject.key._key.pubKeyHex,
-        privateKey: enrollmentObject.key._key.prvKeyHex,
-        userName: userName
-    };
+        if (!hexKeyEntity.publicKey) {
+            throw Error('Public key is missing from hex key entity');
+        }
 
-    let hexDataString = JSON.stringify(hexKeyEntity, null, 4);
+        let hexDataString = JSON.stringify(hexKeyEntity, null, 4);
 
-    await Promise.all([
-        wallet.put(userName, x509Identity),
-        fs.writeFile(path.join(config.fabric.walletPath, `${userName}.json`), hexDataString,
-            (err) => { if (err) throw err})
-    ]);
+        logger.debug('Saving to wallet and file system...');
+        await Promise.all([
+            wallet.put(userName, x509Identity),
+            fs.writeFile(path.join(config.fabric.walletPath, `${userName}.json`), hexDataString,
+                (err) => { if (err) throw err})
+        ]);
 
-    return hexKeyEntity;
+        logger.debug('Wallet entity creation completed successfully');
+        return hexKeyEntity;
+    } catch (error) {
+        logger.error(`Error in createNewWalletEntity: ${error.message}`);
+        logger.error(`Stack trace: ${error.stack}`);
+        throw error;
+    }
 }
 
 /**

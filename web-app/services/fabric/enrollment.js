@@ -135,7 +135,14 @@ async function registerUser(email) {
             ]
         });
 
+        logger.debug('Enrollment successful, creating wallet entity...');
         let userKeys = await walletUtils.createNewWalletEntity(enrollment, email);
+        logger.debug(`User keys generated: ${JSON.stringify(userKeys)}`);
+        
+        if (!userKeys || !userKeys.publicKey) {
+            throw Error('Failed to generate user keys or public key is missing');
+        }
+
         logger.info(`Successfully registered and enrolled user ${email} and imported it into the wallet`);
         return userKeys;
     } catch (error) {

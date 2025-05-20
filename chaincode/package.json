@@ -1,0 +1,51 @@
+{
+    "name": "fabcar",
+    "version": "0.0.1",
+    "description": "e-store contract",
+    "main": "index.js",
+    "engines": {
+        "node": ">=16",
+        "npm": ">=8"
+    },
+    "scripts": {
+        "lint": "eslint .",
+        "pretest": "npm run lint",
+        "test": "nyc mocha test --recursive",
+        "start": "fabric-chaincode-node start",
+        "mocha": "mocha test --recursive"
+    },
+    "engineStrict": true,
+    "author": "emali",
+    "dependencies": {
+        "crypto-js": "^4.2.0",
+        "fabric-contract-api": "^2.5.13",
+        "fabric-shim": "^2.5.13",
+        "jsrsasign": "^10.9.0",
+        "merkletreejs": "^0.3.11"
+    },
+    "devDependencies": {
+        "chai": "^4.3.10",
+        "chai-as-promised": "^7.1.1",
+        "eslint": "^8.56.0",
+        "mocha": "^10.2.0",
+        "nyc": "^15.1.0",
+        "sinon": "^17.0.1",
+        "sinon-chai": "^3.7.0"
+    },
+    "nyc": {
+        "exclude": [
+            "coverage/**",
+            "test/**"
+        ],
+        "reporter": [
+            "text-summary",
+            "html"
+        ],
+        "all": true,
+        "check-coverage": true,
+        "statements": 100,
+        "branches": 100,
+        "functions": 100,
+        "lines": 100
+    }
+}

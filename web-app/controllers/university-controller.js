@@ -13,6 +13,18 @@ async function postRegisterUniversity(req, res, next) {
     try {
         logger.info(`Starting university registration process for email: ${req.body.email}`);
         
+        // Check if university already exists in database
+        const existingUniversity = await universities.findOne({ email: req.body.email });
+        if (existingUniversity) {
+            logger.error(`University with email ${req.body.email} already exists in database`);
+            return res.status(400).render("register-university", { 
+                title, 
+                root,
+                error: "A university with this email already exists",
+                logInType: req.session.user_type || "none"
+            });
+        }
+        
         logger.debug('Generating fabric enrollment keys...');
         let keys = await fabricEnrollment.registerUser(req.body.email);
         logger.debug('Fabric enrollment keys generated successfully');

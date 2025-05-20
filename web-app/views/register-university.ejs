@@ -22,6 +22,11 @@
           <h4 class="card-title mt-2">University Sign up</h4>
         </header>
         <article class="card-body">
+          <% if (typeof error !== 'undefined') { %>
+            <div class="alert alert-danger" role="alert">
+              <%= error %>
+            </div>
+          <% } %>
 
           <form action="/university/register/submit" method="POST">
             <div class="form-row">

@@ -1,29 +1,59 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Navbar as BootstrapNavbar, Nav, Container } from 'react-bootstrap';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container">
-        <Link className="navbar-brand" to="/">Blockchain Certificates</Link>
-        <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ml-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/verify">Verify Certificates</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/student/login">Student Login</Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/university/login">University Login</Link>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </nav>
+    <BootstrapNavbar bg="dark" variant="dark" expand="lg">
+      <Container>
+        <BootstrapNavbar.Brand as={Link} to="/">
+          Academic Certificates
+        </BootstrapNavbar.Brand>
+        <BootstrapNavbar.Toggle aria-controls="basic-navbar-nav" />
+        <BootstrapNavbar.Collapse id="basic-navbar-nav">
+          <Nav className="me-auto">
+            {isAuthenticated && (
+              <>
+                <Nav.Link as={Link} to="/">
+                  Dashboard
+                </Nav.Link>
+                <Nav.Link as={Link} to="/certificates">
+                  Certificates
+                </Nav.Link>
+              </>
+            )}
+          </Nav>
+          <Nav>
+            {isAuthenticated ? (
+              <>
+                <Nav.Link as={Link} to="/profile">
+                  {user?.name}
+                </Nav.Link>
+                <Nav.Link onClick={handleLogout}>Logout</Nav.Link>
+              </>
+            ) : (
+              <>
+                <Nav.Link as={Link} to="/login">
+                  Login
+                </Nav.Link>
+                <Nav.Link as={Link} to="/register">
+                  Register
+                </Nav.Link>
+              </>
+            )}
+          </Nav>
+        </BootstrapNavbar.Collapse>
+      </Container>
+    </BootstrapNavbar>
   );
 };
 

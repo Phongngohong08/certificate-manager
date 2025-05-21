@@ -35,13 +35,13 @@ let app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3001',
+  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:3001',
   credentials: true
 }));
 
 //middleware
 app.use(limiter.rateLimiterMiddlewareInMemory);
-app.use(morgan('tiny', { stream: logger.stream }));
+app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

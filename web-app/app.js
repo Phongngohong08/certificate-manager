@@ -35,7 +35,7 @@ let app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3000',
+  origin: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3001',
   credentials: true
 }));
 
@@ -75,7 +75,7 @@ if (process.env.NODE_ENV === 'production') {
 } else {
   // In development, serve React dev server
   app.get('*', (req, res) => {
-    res.redirect('http://localhost:3000');
+    res.redirect('http://localhost:3001');
   });
 }
 

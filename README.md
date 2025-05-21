@@ -106,6 +106,14 @@ FABRIC_CHAINCODE_NAME=academic-certificates
 ```bash
 # Chạy ở chế độ development
 npm run start-development
+
+# Nếu chạy React trên nhánh reactjs
+git checkout reactjs
+npm install
+cd client
+npm install
+cd ..
+npm run dev
 ```
 Ứng dụng sẽ chạy tại địa chỉ: http://localhost:3000
 

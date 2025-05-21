@@ -39,10 +39,6 @@ app.use(cors({
   credentials: true
 }));
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
-
 //middleware
 app.use(limiter.rateLimiterMiddlewareInMemory);
 app.use(morgan('tiny', { stream: logger.stream }));
@@ -76,6 +72,11 @@ if (process.env.NODE_ENV === 'production') {
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
   });
+} else {
+  // In development, serve React dev server
+  app.get('*', (req, res) => {
+    res.redirect('http://localhost:3000');
+  });
 }
 
 // catch 404 and forward to error handler
@@ -89,9 +90,11 @@ app.use(function(err, req, res, next) {
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // send error response as JSON
+  res.status(err.status || 500).json({
+    message: err.message,
+    error: req.app.get('env') === 'development' ? err : {}
+  });
 });
 
 

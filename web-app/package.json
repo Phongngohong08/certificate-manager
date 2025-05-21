@@ -6,13 +6,20 @@
     "start": "node ./bin/www",
     "start-development": "cross-env NODE_ENV=development node -r dotenv/config ./bin/www",
     "start-production": "cross-env NODE_ENV=production node -r dotenv/config ./bin/www",
-    "dev": "nodemon -e js,ejs,css,html -r dotenv/config ./bin/www",
+    "dev": "concurrently \"nodemon -e js,ejs,css,html -r dotenv/config ./bin/www\" \"cd client && npm start\"",
     "test": "cross-env NODE_ENV=development node -r dotenv/config ./playground/test.js",
-    "join-channel": "cross-env NODE_ENV=development node -r dotenv/config ./scripts/join-channel.js"
+    "join-channel": "cross-env NODE_ENV=development node -r dotenv/config ./scripts/join-channel.js",
+    "build": "cd client && npm run build",
+    "install-client": "cd client && npm install",
+    "install-all": "npm install && npm run install-client"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "app-root-path": "^3.1.0",
+    "axios": "^1.9.0",
     "bcryptjs": "^2.4.3",
+    "bootstrap": "^5.3.6",
     "connect-mongo": "^5.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -32,11 +39,13 @@
     "morgan": "^1.10.0",
     "node-cache": "^5.1.2",
     "rate-limiter-flexible": "^3.0.1",
+    "react-router-dom": "^7.6.0",
     "split": "^1.0.1",
     "validator": "^13.11.0",
     "winston": "^3.11.0"
   },
   "devDependencies": {
+    "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "dotenv": "^16.4.1",
     "eslint": "^8.56.0",

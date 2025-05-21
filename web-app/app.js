@@ -1,4 +1,3 @@
-
 //initialize env variables, database and loaders.
 const config = require('./loaders/config');
 
@@ -17,6 +16,7 @@ let cookieParser = require('cookie-parser');
 let morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const session = require('express-session');
 
 //local imports
 let limiter = require('./middleware/rate-limiter-middleware');
@@ -33,13 +33,17 @@ let verifyRouter = require('./routes/verify-router');
 //express
 let app = express();
 
+// CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' ? 'https://your-domain.com' : 'http://localhost:3000',
+  credentials: true
+}));
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 //middleware
-
-app.use(cors());
 app.use(limiter.rateLimiterMiddlewareInMemory);
 app.use(morgan('tiny', { stream: logger.stream }));
 app.use(express.json());
@@ -48,7 +52,16 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
 
-app.use(sessionMiddleware);
+// Session configuration
+app.use(session({
+  secret: 'your-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 //routers
 app.use('/', indexRouter);
@@ -56,6 +69,15 @@ app.use('/api', apiRouter);
 app.use('/university', universityRouter);
 app.use('/student', studentRouter);
 app.use('/verify', verifyRouter);
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'client/build')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+  });
+}
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));

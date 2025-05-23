@@ -10,13 +10,13 @@ router.get('/dashboard', auth, studentMiddleware.authenticateLogin, studentContr
 
 router.get('/register', function(req, res, next) {
     res.render('register-student', {   title, root,
-        logInType: req.user ? req.user.user_type : "none"
+        logInType: req.user ? req.user.role : "none"
     });
 });
 
 router.get('/login', auth, studentMiddleware.redirectToDashboardIfLoggedIn, function (req,res,next) {
     res.render('login-student',  {   title, root,
-        logInType: req.user ? req.user.user_type : "none"
+        logInType: req.user ? req.user.role : "none"
     })
 });
 

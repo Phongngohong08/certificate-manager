@@ -43,10 +43,10 @@ async function logOutAndRedirect (req, res, next) {
 async function postLoginStudent (req,res,next) {
     try {
         let studentObject = await students.validateByCredentials(req.body.email, req.body.password)
-        // Tạo JWT thay vì lưu session
+        // Tạo JWT
         const token = jwt.sign({
-            user_id: studentObject._id,
-            user_type: "student",
+            id: studentObject._id,
+            role: "student",
             email: studentObject.email,
             name: studentObject.name,
             publicKey: studentObject.publicKey
@@ -54,6 +54,12 @@ async function postLoginStudent (req,res,next) {
         // Trả về token cho client
         return res.json({
             token,
+            user: {
+                id: studentObject._id,
+                email: studentObject.email,
+                name: studentObject.name,
+                role: "student"
+            },
             message: "Login successful"
         });
     } catch (e) {
@@ -66,7 +72,7 @@ async function getDashboard(req, res, next) {
     try {
         let certData = await studentService.getCertificateDataforDashboard(req.user.publicKey, req.user.email);
         res.render("dashboard-student", { title, root, certData,
-            logInType: req.user ? req.user.user_type : "none"});
+            logInType: req.user ? req.user.role : "none"});
     } catch (e) {
         logger.error(e);
         next(e);

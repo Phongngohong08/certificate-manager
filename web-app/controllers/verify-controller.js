@@ -18,7 +18,7 @@ async function postVerify(req,res,next) {
             let certificateDbObject = await certificates.findOne({"_id": proofObject.certUUID}).select("studentName studentEmail _id dateOfIssuing universityName universityEmail");
 
             res.render("verify-success", { title, root,
-                logInType: req.session.user_type || "none",
+                logInType: req.user ? req.user.role : "none",
                 certData : certificateDbObject,
                 proofData : proofObject.disclosedData
             })
@@ -26,7 +26,7 @@ async function postVerify(req,res,next) {
         } else {
             res.render("verify-fail", {
                 title, root,
-                logInType: req.session.user_type || "none"
+                logInType: req.user ? req.user.role : "none"
             })
         }
 

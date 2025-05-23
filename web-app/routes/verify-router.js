@@ -7,7 +7,7 @@ let root = "verify";
 
 
 router.get('/', function(req, res, next) { res.render('verify', {   title, root,
-    logInType: req.user ? req.user.user_type : "none"
+    logInType: req.user ? req.user.role : "none"
 });});
 
 router.post('/', verifyController.postVerify);

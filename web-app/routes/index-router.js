@@ -6,7 +6,7 @@ let root = "index";
 
 /* GET home page. */
 router.get('/', function(req, res, next) { res.render('index', {   title, root,
-    logInType: req.user ? req.user.user_type : "none"
+    logInType: req.user ? req.user.role : "none"
 });});
 
 module.exports = router;

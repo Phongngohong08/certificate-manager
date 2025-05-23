@@ -62,18 +62,22 @@ async function postRegisterUniversity(req, res, next) {
 async function postLoginUniversity (req,res,next) {
     try {
         let universityObject = await universities.validateByCredentials(req.body.email, req.body.password)
-        // Tạo JWT thay vì lưu session
+        // Tạo JWT
         const token = jwt.sign({
-            user_id: universityObject._id,
-            user_type: "university",
+            id: universityObject._id,
+            role: "university",
             email: universityObject.email,
             name: universityObject.name
         }, JWT_SECRET, { expiresIn: '2h' });
-
-        // Trả về token cho client (có thể set cookie httpOnly hoặc trả về JSON)
-        // Ở đây trả về JSON
+        // Trả về token cho client
         return res.json({
             token,
+            user: {
+                id: universityObject._id,
+                email: universityObject.email,
+                name: universityObject.name,
+                role: "university"
+            },
             message: "Login successful"
         });
     } catch (e) {
@@ -82,22 +86,8 @@ async function postLoginUniversity (req,res,next) {
     }
 }
 
-// Middleware xác thực JWT
-function authenticateJWT(req, res, next) {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith('Bearer ')) {
-        const token = authHeader.split(' ')[1];
-        jwt.verify(token, JWT_SECRET, (err, user) => {
-            if (err) {
-                return res.status(403).json({ error: 'Invalid or expired token' });
-            }
-            req.user = user;
-            next();
-        });
-    } else {
-        return res.status(401).json({ error: 'Authorization header missing' });
-    }
-}
+// Middleware xác thực JWT (nếu cần dùng riêng cho controller này)
+// Đã có middleware/auth.js chung, nên không cần hàm authenticateJWT riêng ở đây nữa
 
 async function logOutAndRedirect (req, res, next) {
     // Với JWT, chỉ cần client xóa token, server không cần xử lý
@@ -118,7 +108,7 @@ async function postIssueCertificate(req,res,next) {
                 title, 
                 root,
                 error: `Thiếu trường bắt buộc: ${missingFields.join(', ')}`,
-                logInType: req.user ? req.user.user_type : "none"
+                logInType: req.user ? req.user.role : "none"
             });
         }
 
@@ -129,7 +119,7 @@ async function postIssueCertificate(req,res,next) {
                 title, 
                 root,
                 error: "Vui lòng đăng nhập với tư cách trường đại học để cấp chứng chỉ",
-                logInType: req.user ? req.user.user_type : "none"
+                logInType: req.user ? req.user.role : "none"
             });
         }
         let certData = {
@@ -152,7 +142,7 @@ async function postIssueCertificate(req,res,next) {
             res.render("issue-success", { 
                 title, 
                 root,
-                logInType: req.user ? req.user.user_type : "none"
+                logInType: req.user ? req.user.role : "none"
             });
         }
     } catch (e) {
@@ -165,7 +155,7 @@ async function postIssueCertificate(req,res,next) {
                 title, 
                 root,
                 error: "Chưa khởi tạo schema chứng chỉ. Vui lòng liên hệ quản trị viên.",
-                logInType: req.user ? req.user.user_type : "none"
+                logInType: req.user ? req.user.role : "none"
             });
         }
         if (e.message.includes("Could not fetch student profile")) {
@@ -173,7 +163,7 @@ async function postIssueCertificate(req,res,next) {
                 title, 
                 root,
                 error: "Sinh viên chưa đăng ký trong hệ thống. Vui lòng kiểm tra lại email.",
-                logInType: req.user ? req.user.user_type : "none"
+                logInType: req.user ? req.user.role : "none"
             });
         }
 
@@ -186,11 +176,11 @@ async function getDashboard(req, res, next) {
     try {
         let certData = await universityService.getCertificateDataforDashboard(req.user.name, req.user.email);
         res.render("dashboard-university", { title, root, certData,
-            logInType: req.user ? req.user.user_type : "none"});
+            logInType: req.user ? req.user.role : "none"});
 
     } catch (e) {
         logger.error(e);
         next(e);
     }
 }
-module.exports = {postRegisterUniversity, postLoginUniversity, logOutAndRedirect, postIssueCertificate, getDashboard, authenticateJWT};
+module.exports = {postRegisterUniversity, postLoginUniversity, logOutAndRedirect, postIssueCertificate, getDashboard};

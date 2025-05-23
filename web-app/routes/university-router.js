@@ -10,13 +10,13 @@ let root = "university";
 
 router.get('/register', function(req, res, next) {
     res.render('register-university', {   title, root,
-        logInType: req.user ? req.user.user_type : "none"
+        logInType: req.user ? req.user.role : "none"
     });
 });
 
 router.get('/login', auth, universityMiddleware.redirectToDashboardIfLoggedIn, function (req,res,next) {
     res.render('login-university',  {   title, root,
-        logInType: req.user ? req.user.user_type : "none"
+        logInType: req.user ? req.user.role : "none"
     })
 });
 
@@ -24,7 +24,7 @@ router.get('/dashboard', auth, universityMiddleware.authenticateLogin, universit
 
 router.get('/issue', auth, universityMiddleware.authenticateLogin, function (req,res,next) {
     res.render('issue-university',  {   title, root,
-        logInType: req.user ? req.user.user_type : "none"
+        logInType: req.user ? req.user.role : "none"
     })
 });
 

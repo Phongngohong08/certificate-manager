@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const universityController = require('../controllers/university-controller');
 const universityMiddleware = require('../middleware/university-middleware');
+const auth = require('../middleware/auth');
 
 let title = "University";
 let root = "university";
@@ -9,25 +10,25 @@ let root = "university";
 
 router.get('/register', function(req, res, next) {
     res.render('register-university', {   title, root,
-        logInType: req.session.user_type || "none"
+        logInType: req.user ? req.user.user_type : "none"
     });
 });
 
-router.get('/login',universityMiddleware.redirectToDashboardIfLoggedIn, function (req,res,next) {
+router.get('/login', auth, universityMiddleware.redirectToDashboardIfLoggedIn, function (req,res,next) {
     res.render('login-university',  {   title, root,
-        logInType: req.session.user_type || "none"
+        logInType: req.user ? req.user.user_type : "none"
     })
 });
 
-router.get('/dashboard', universityMiddleware.authenticateLogin, universityController.getDashboard);
+router.get('/dashboard', auth, universityMiddleware.authenticateLogin, universityController.getDashboard);
 
-router.get('/issue', universityMiddleware.authenticateLogin, function (req,res,next) {
+router.get('/issue', auth, universityMiddleware.authenticateLogin, function (req,res,next) {
     res.render('issue-university',  {   title, root,
-        logInType: req.session.user_type || "none"
+        logInType: req.user ? req.user.user_type : "none"
     })
 });
 
-router.post("/issue", universityController.postIssueCertificate);
+router.post("/issue", auth, universityMiddleware.authenticateLogin, universityController.postIssueCertificate);
 
 
 router.post('/register/submit', universityController.postRegisterUniversity);

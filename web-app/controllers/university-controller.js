@@ -3,6 +3,8 @@ let fabricEnrollment  = require('../services/fabric/enrollment');
 let chaincode = require('../services/fabric/chaincode');
 let logger = require("../services/logger");
 let universityService = require("../services/university-service");
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 
 let title = "University";
@@ -60,15 +62,40 @@ async function postRegisterUniversity(req, res, next) {
 async function postLoginUniversity (req,res,next) {
     try {
         let universityObject = await universities.validateByCredentials(req.body.email, req.body.password)
-        req.session.user_id = universityObject._id;
-        req.session.user_type = "university";
-        req.session.email = universityObject.email;
-        req.session.name = universityObject.name;
+        // Tạo JWT thay vì lưu session
+        const token = jwt.sign({
+            user_id: universityObject._id,
+            user_type: "university",
+            email: universityObject.email,
+            name: universityObject.name
+        }, JWT_SECRET, { expiresIn: '2h' });
 
-        return res.redirect("/university/issue")
+        // Trả về token cho client (có thể set cookie httpOnly hoặc trả về JSON)
+        // Ở đây trả về JSON
+        return res.json({
+            token,
+            message: "Login successful"
+        });
     } catch (e) {
         logger.error(e);
         next(e);
+    }
+}
+
+// Middleware xác thực JWT
+function authenticateJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.split(' ')[1];
+        jwt.verify(token, JWT_SECRET, (err, user) => {
+            if (err) {
+                return res.status(403).json({ error: 'Invalid or expired token' });
+            }
+            req.user = user;
+            next();
+        });
+    } else {
+        return res.status(401).json({ error: 'Authorization header missing' });
     }
 }
 
@@ -96,22 +123,21 @@ async function postIssueCertificate(req,res,next) {
             });
         }
 
-        // Validate session
-        if (!req.session.name || !req.session.email) {
-            logger.error('University session data missing');
+        // Validate session (JWT)
+        if (!req.user || !req.user.name || !req.user.email) {
+            logger.error('University JWT data missing');
             return res.status(401).render("issue-university", { 
                 title, 
                 root,
                 error: "Please log in as a university to issue certificates",
-                logInType: req.session.user_type || "none"
+                logInType: req.user ? req.user.user_type : "none"
             });
         }
-
         let certData = {
             studentEmail: req.body.studentEmail,
             studentName: req.body.studentName,
-            universityName: req.session.name,
-            universityEmail: req.session.email,
+            universityName: req.user.name,
+            universityEmail: req.user.email,
             major: req.body.major,
             departmentName: req.body.department,
             cgpa: req.body.cgpa,
@@ -127,10 +153,9 @@ async function postIssueCertificate(req,res,next) {
             res.render("issue-success", { 
                 title, 
                 root,
-                logInType: req.session.user_type || "none"
+                logInType: req.user ? req.user.user_type : "none"
             });
         }
-
     } catch (e) {
         logger.error(`Error in postIssueCertificate: ${e.message}`);
         logger.error(`Stack trace: ${e.stack}`);
@@ -161,13 +186,13 @@ async function postIssueCertificate(req,res,next) {
 
 async function getDashboard(req, res, next) {
     try {
-        let certData = await universityService.getCertificateDataforDashboard(req.session.name, req.session.email);
+        let certData = await universityService.getCertificateDataforDashboard(req.user.name, req.user.email);
         res.render("dashboard-university", { title, root, certData,
-            logInType: req.session.user_type || "none"});
+            logInType: req.user ? req.user.user_type : "none"});
 
     } catch (e) {
         logger.error(e);
         next(e);
     }
 }
-module.exports = {postRegisterUniversity, postLoginUniversity, logOutAndRedirect, postIssueCertificate, getDashboard};
+module.exports = {postRegisterUniversity, postLoginUniversity, logOutAndRedirect, postIssueCertificate, getDashboard, authenticateJWT};

@@ -12,7 +12,9 @@ async function getGenerateProof(req,res,next) {
             throw Error("Choose atleast one attribute to share")
         }
 
-        let mTreeProof = await encryption.generateCertificateProof(req.query.sharedAttributes, req.query.certUUID, req.session.email);
+        // Lấy email từ JWT nếu có
+        const email = req.user ? req.user.email : undefined;
+        let mTreeProof = await encryption.generateCertificateProof(req.query.sharedAttributes, req.query.certUUID, email);
         let disclosedData = await certificates.findOne({"_id" : req.query.certUUID}).select(req.query.sharedAttributes.join(" ") + " -_id");
 
         res.status(200).send({

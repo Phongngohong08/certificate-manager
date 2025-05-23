@@ -1,6 +1,127 @@
 # Blockchain Academic Certificates
 
-Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric 2.2.19.
+A decentralized application for managing academic certificates using Hyperledger Fabric blockchain technology, with a modern Node.js backend and React.js frontend.
+
+## Features
+
+- Secure certificate issuance and verification using blockchain
+- JWT-based authentication system
+- Role-based access control (Admin, Issuer, User)
+- Modern React.js frontend with Bootstrap UI
+- RESTful API backend with Node.js and Express
+- MongoDB database integration
+- Hyperledger Fabric blockchain integration
+
+## Prerequisites
+
+- Node.js >= 20.x.x
+- npm >= 10.x.x
+- MongoDB
+- Hyperledger Fabric network setup
+- Docker and Docker Compose (for local development)
+
+## Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/blockchain-academic-certificates.git
+cd blockchain-academic-certificates
+```
+
+2. Install backend dependencies:
+```bash
+cd web-app
+npm install
+```
+
+3. Install frontend dependencies:
+```bash
+cd client
+npm install
+cd ..
+```
+
+4. Create a `.env` file in the `web-app` directory with the following variables:
+```env
+PORT=3000
+MONGODB_URI=mongodb://localhost:27017/academic-certificates
+JWT_SECRET=your-secret-key
+NODE_ENV=development
+FRONTEND_URL=http://localhost:3001
+CHANNEL_NAME=mychannel
+CHAINCODE_NAME=academic-certificates
+MSP_ID=Org1MSP
+CONNECTION_PROFILE=./connection-profile.json
+```
+
+## Running the Application
+
+1. Start the development servers (both backend and frontend):
+```bash
+cd web-app
+npm run dev
+```
+
+This will start:
+- Backend server on http://localhost:3000
+- Frontend development server on http://localhost:3001
+
+2. For production:
+```bash
+# Build the frontend
+npm run build
+
+# Start the production server
+npm run start-production
+```
+
+## API Endpoints
+
+### Authentication
+- POST `/api/auth/register` - Register a new user
+- POST `/api/auth/login` - Login user
+- GET `/api/auth/profile` - Get user profile (protected)
+
+### Certificates
+- GET `/api/certificates` - List certificates (protected)
+- POST `/api/certificates` - Issue new certificate (protected, issuer only)
+- GET `/api/certificates/:id` - Get certificate details
+- POST `/api/certificates/verify` - Verify certificate
+
+## Project Structure
+
+```
+blockchain-academic-certificates/
+├── web-app/                 # Backend application
+│   ├── client/             # React frontend
+│   ├── controllers/        # Route controllers
+│   ├── middleware/         # Custom middleware
+│   ├── models/            # Database models
+│   ├── routes/            # API routes
+│   ├── services/          # Business logic
+│   └── utils/             # Utility functions
+└── chaincode/             # Hyperledger Fabric chaincode
+```
+
+## Authentication
+
+The application uses JWT (JSON Web Tokens) for authentication. The token should be included in the Authorization header for protected routes:
+
+```
+Authorization: Bearer <token>
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Yêu cầu hệ thống
 

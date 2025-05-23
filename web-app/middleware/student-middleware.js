@@ -1,21 +1,15 @@
-const logger = require('../services/logger');
+const auth = require('./auth');
 
-function authenticateLogin (req, res, next) {
-    try {
-        if (req.session.user_type === "student") next();
-        else throw new Error("Unauthorized access: Login first");
-    } catch (e) {
-        next(e);
-    }
+function authenticateLogin(req, res, next) {
+    // Chỉ cho phép student đã xác thực JWT
+    if (req.user && req.user.user_type === "student") return next();
+    return res.status(401).json({ error: "Unauthorized access: Login first" });
 }
 
-function redirectToDashboardIfLoggedIn(req,res,next) {
-    try {
-        if (req.session.user_type === "student") return res.redirect('/student/dashboard');
-        else next();
-    } catch (e) {
-        next(e);
-    }
+function redirectToDashboardIfLoggedIn(req, res, next) {
+    // Nếu đã đăng nhập (JWT), chuyển hướng dashboard
+    if (req.user && req.user.user_type === "student") return res.redirect('/student/dashboard');
+    return next();
 }
 
-module.exports = {redirectToDashboardIfLoggedIn, authenticateLogin};
+module.exports = { redirectToDashboardIfLoggedIn, authenticateLogin, auth };

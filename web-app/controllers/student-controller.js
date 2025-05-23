@@ -3,19 +3,19 @@ let fabricEnrollment  = require('../services/fabric/enrollment');
 let chaincode = require('../services/fabric/chaincode');
 let logger = require("../services/logger");
 let studentService = require('../services/student-service');
+const jwt = require('jsonwebtoken');
 
 let title = "Student Dashboard";
 let root = "student";
+const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
 
 
 async function postRegisterStudent(req, res, next) {
     try {
         logger.info(`Starting student registration process for email: ${req.body.email}`);
-        
         logger.debug('Generating fabric enrollment keys...');
         let keys = await fabricEnrollment.registerUser(req.body.email);
         logger.debug('Fabric enrollment keys generated successfully');
-
         logger.debug('Creating student record in database...');
         let dbResponse = await students.create({
             name : req.body.name,
@@ -24,9 +24,8 @@ async function postRegisterStudent(req, res, next) {
             publicKey: keys.publicKey
         });
         logger.info('Student registration completed successfully');
-
         res.render("register-success", { title, root,
-            logInType: req.session.user_type || "none"});
+            logInType: "none"});
     }
     catch (e) {
         logger.error(`Error during student registration: ${e.message}`);
@@ -36,36 +35,38 @@ async function postRegisterStudent(req, res, next) {
 }
 
 async function logOutAndRedirect (req, res, next) {
-    req.session.destroy(function () {
-        res.redirect('/');
-    });
+    // Với JWT, chỉ cần client xóa token, server không cần xử lý
+    res.redirect('/');
 };
 
 
 async function postLoginStudent (req,res,next) {
     try {
         let studentObject = await students.validateByCredentials(req.body.email, req.body.password)
-
-        req.session.user_id = studentObject._id;
-        req.session.user_type = "student";
-        req.session.email = studentObject.email;
-        req.session.name = studentObject.name;
-        req.session.publicKey = studentObject.publicKey;
-
-        return res.redirect("/student/dashboard")
+        // Tạo JWT thay vì lưu session
+        const token = jwt.sign({
+            user_id: studentObject._id,
+            user_type: "student",
+            email: studentObject.email,
+            name: studentObject.name,
+            publicKey: studentObject.publicKey
+        }, JWT_SECRET, { expiresIn: '2h' });
+        // Trả về token cho client
+        return res.json({
+            token,
+            message: "Login successful"
+        });
     } catch (e) {
         logger.error(e);
         next(e);
     }
 }
 
-
 async function getDashboard(req, res, next) {
     try {
-        let certData = await studentService.getCertificateDataforDashboard(req.session.publicKey, req.session.email);
+        let certData = await studentService.getCertificateDataforDashboard(req.user.publicKey, req.user.email);
         res.render("dashboard-student", { title, root, certData,
-            logInType: req.session.user_type || "none"});
-
+            logInType: req.user ? req.user.user_type : "none"});
     } catch (e) {
         logger.error(e);
         next(e);

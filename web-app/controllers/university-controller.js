@@ -23,7 +23,7 @@ async function postRegisterUniversity(req, res, next) {
                 title, 
                 root,
                 error: "A university with this email already exists",
-                logInType: req.session.user_type || "none"
+                logInType: "none"
             });
         }
         
@@ -50,7 +50,7 @@ async function postRegisterUniversity(req, res, next) {
         logger.info(`University registration completed successfully. Ledger profile: ${result}`);
 
         res.render("register-success", { title, root,
-            logInType: req.session.user_type || "none"});
+            logInType: "none"}); // Đăng ký xong, chưa đăng nhập nên logInType là none
     }
     catch (e) {
         logger.error(`Error during university registration: ${e.message}`);
@@ -100,36 +100,35 @@ function authenticateJWT(req, res, next) {
 }
 
 async function logOutAndRedirect (req, res, next) {
-    req.session.destroy(function () {
-        res.redirect('/');
-    });
+    // Với JWT, chỉ cần client xóa token, server không cần xử lý
+    res.redirect('/');
 }
 
 async function postIssueCertificate(req,res,next) {
     try {
-        logger.info(`Starting certificate issuance request for student: ${req.body.studentEmail}`);
+        logger.info(`[University] Bắt đầu cấp chứng chỉ cho sinh viên: ${req.body.studentEmail}`);
         
         // Validate required fields
         const requiredFields = ['studentEmail', 'studentName', 'major', 'department', 'cgpa', 'date'];
         const missingFields = requiredFields.filter(field => !req.body[field]);
         
         if (missingFields.length > 0) {
-            logger.error(`Missing required fields: ${missingFields.join(', ')}`);
+            logger.error(`[University] Thiếu trường bắt buộc: ${missingFields.join(', ')}`);
             return res.status(400).render("issue-university", { 
                 title, 
                 root,
-                error: `Missing required fields: ${missingFields.join(', ')}`,
-                logInType: req.session.user_type || "none"
+                error: `Thiếu trường bắt buộc: ${missingFields.join(', ')}`,
+                logInType: req.user ? req.user.user_type : "none"
             });
         }
 
         // Validate session (JWT)
         if (!req.user || !req.user.name || !req.user.email) {
-            logger.error('University JWT data missing');
+            logger.error('[University] Thiếu thông tin xác thực JWT');
             return res.status(401).render("issue-university", { 
                 title, 
                 root,
-                error: "Please log in as a university to issue certificates",
+                error: "Vui lòng đăng nhập với tư cách trường đại học để cấp chứng chỉ",
                 logInType: req.user ? req.user.user_type : "none"
             });
         }
@@ -149,7 +148,7 @@ async function postIssueCertificate(req,res,next) {
         let serviceResponse = await universityService.issueCertificate(certData);
 
         if(serviceResponse) {
-            logger.info(`Certificate issued successfully for student: ${req.body.studentEmail}`);
+            logger.info(`[University] Cấp chứng chỉ thành công cho sinh viên: ${req.body.studentEmail}`);
             res.render("issue-success", { 
                 title, 
                 root,
@@ -157,25 +156,24 @@ async function postIssueCertificate(req,res,next) {
             });
         }
     } catch (e) {
-        logger.error(`Error in postIssueCertificate: ${e.message}`);
-        logger.error(`Stack trace: ${e.stack}`);
+        logger.error(`[University] Lỗi khi cấp chứng chỉ: ${e.message}`);
+        logger.error(`[University] Stack trace: ${e.stack}`);
         
         // Handle specific error cases
         if (e.message.includes("Schema v1 does not exist")) {
             return res.status(500).render("issue-university", { 
                 title, 
                 root,
-                error: "The certificate schema is not initialized. Please contact the system administrator.",
-                logInType: req.session.user_type || "none"
+                error: "Chưa khởi tạo schema chứng chỉ. Vui lòng liên hệ quản trị viên.",
+                logInType: req.user ? req.user.user_type : "none"
             });
         }
-        
         if (e.message.includes("Could not fetch student profile")) {
             return res.status(400).render("issue-university", { 
                 title, 
                 root,
-                error: "The student is not registered in the system. Please ensure the student email is correct.",
-                logInType: req.session.user_type || "none"
+                error: "Sinh viên chưa đăng ký trong hệ thống. Vui lòng kiểm tra lại email.",
+                logInType: req.user ? req.user.user_type : "none"
             });
         }
 

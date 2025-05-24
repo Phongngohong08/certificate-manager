@@ -41,3 +41,16 @@ The following resources are available in the `server/swagger/` directory:
 - JWT-based authentication for universities and students
 - Blockchain integration for certificate issuance and verification
 - Merkle tree proof generation for selective disclosure of certificate data
+
+## Enroll Admin (Fabric CA Wallet)
+
+Trước khi chạy backend, bạn cần enroll admin để tạo danh tính vào wallet cho Hyperledger Fabric:
+
+1. Đảm bảo đã cấu hình đúng biến môi trường `CCP_PATH` trong file `.env`.
+2. Chạy lệnh sau trong thư mục `server`:
+   ```powershell
+   node enrollAdmin.js
+   ```
+   Nếu thành công sẽ xuất hiện thông báo: `Enroll admin thành công và đã lưu vào wallet!`
+
+Nếu không thực hiện bước này, backend sẽ báo lỗi: `Identity for user admin@hust.edu.vn not found in wallet` khi truy cập blockchain.

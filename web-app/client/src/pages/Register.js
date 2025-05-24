@@ -33,6 +33,9 @@ const Register = () => {
     try {
       setError('');
       setLoading(true);
+      // Xóa token cũ trước khi đăng ký để tránh lỗi header quá lớn
+      localStorage.removeItem('token');
+      delete window.axios?.defaults?.headers?.common?.['Authorization'];
       await register({
         name: formData.name,
         email: formData.email,

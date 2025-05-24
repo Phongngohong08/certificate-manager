@@ -1,7 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002';
 
 const AuthContext = createContext(null);
 

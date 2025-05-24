@@ -16,10 +16,9 @@ Dự án này triển khai một hệ thống quản lý chứng chỉ học thu
 ```bash
 # Ubuntu/Debian:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
-\. "$HOME/.nvm/nvm.sh"
+. "$HOME/.nvm/nvm.sh"
 nvm install 22
 node -v
-nvm current
 npm -v
 ```
 
@@ -32,15 +31,10 @@ sudo apt-get update
 sudo apt-get install -y mongodb-org
 sudo systemctl start mongod
 sudo systemctl enable mongod
-
-# Có thể tạo database ở bước này
-mongosh
-use blockchaincertificate (show dbs nếu không thấy phải tạo tay 1 bản ghi)
 ```
 
 ### 3. Cài đặt Docker và Docker Compose
 ```bash
-# Ubuntu/Debian:
 sudo apt-get update
 sudo apt-get install -y docker.io docker-compose
 sudo systemctl start docker
@@ -49,12 +43,10 @@ sudo usermod -aG docker $USER
 ```
 
 ## Cài đặt và chạy dự án
-### Nên chạy test fabric-samples trước
-`https://github.com/Phongngohong08/hyperledger-fabric/blob/main/README_Fabric_Samples.md`
 
 ### 1. Clone repository
 ```bash
-https://github.com/Phongngohong08/certificate-manager.git
+git clone https://github.com/Phongngohong08/certificate-manager.git
 cd certificate-manager
 ```
 
@@ -73,87 +65,38 @@ cd fabric-samples/test-network
 ./network.sh deployCC -ccn academic-certificates -ccp ../../certificate-manager/chaincode -ccl javascript
 ```
 
-### 3. Cài đặt và chạy ứng dụng web
+### 3. Cài đặt và chạy ứng dụng web mới (web-dev)
 
+#### Backend (Node.js/Express)
 ```bash
-# Khởi động database
-sudo systemctl start mongod
-
-# Di chuyển đến thư mục web-app
-cd ../../certificate-manager/web-app
-
-# Cài đặt dependencies
+cd web-dev/server
+cp .env.example .env # hoặc tự tạo file .env theo mẫu
 npm install
-or
-npm install --only=dev
-
-# Tạo file .env
-touch .env
+npm start
 ```
 
-Thêm các biến môi trường sau vào file `.env` (nhớ thay đổi ccp_path):
-```env
-MONGODB_URI_LOCAL=mongodb://localhost:27017/blockchaincertificate
-PORT=3000
-LOG_LEVEL=info
-EXPRESS_SESSION_SECRET=your-secret-key-here
-CCP_PATH=/home/phongnh/go/src/github.com/Phongngohong08/fabric-samples/test-network/organizations/peerOrganizations/org1.example.com/connection-org1.json
-FABRIC_CHANNEL_NAME=mychannel
-FABRIC_CHAINCODE_NAME=academic-certificates
-```
-
-### 4. Chạy ứng dụng
+#### Frontend (ReactJS)
 ```bash
-# Chạy ở chế độ development
-npm run start-development
-
-# Nếu chạy React trên nhánh reactjs
-git checkout reactjs
+cd ../client
+cp .env.example .env # hoặc tự tạo file .env theo mẫu
 npm install
-cd client
-npm install
-cd ..
-npm run dev
+npm start
 ```
-Ứng dụng sẽ chạy tại địa chỉ: http://localhost:3000
+
+- Backend mặc định chạy ở http://localhost:3002
+- Frontend mặc định chạy ở http://localhost:3000
+
+### 4. Cấu hình biến môi trường
+- Tham khảo file `.env.example` trong `web-dev/server/` và `web-dev/client/` để cấu hình đúng các biến môi trường cần thiết.
 
 ## Cấu trúc dự án
 
 - `chaincode/`: Chứa mã nguồn smart contract
-- `web-app/`: Ứng dụng web frontend
+- `web-dev/`: Ứng dụng web mới (Node.js backend + ReactJS frontend)
+    - `server/`: Backend Node.js/Express
+    - `client/`: Frontend ReactJS
 - `resources/`: Tài nguyên và tài liệu
 
 ## Giấy phép
 
-MIT License 
-
-## Scripts
-
-### Join Channel
-```bash
-npm run join-channel
-```
-
-Script này được sử dụng để kiểm tra và xác minh kết nối đến Hyperledger Fabric channel. Nó sẽ:
-
-1. Kiểm tra kết nối đến channel
-2. Hiển thị thông tin về channel:
-   - Tên channel
-   - Block height
-   - Hash của block hiện tại và block trước đó
-3. Hiển thị cấu hình channel:
-   - Channel ID
-   - Version
-   - Orderer address
-4. Liệt kê các peer đã join vào channel
-
-Script này hữu ích khi:
-- Kiểm tra xem channel đã được tạo chưa
-- Xác minh quyền truy cập của admin vào channel
-- Kiểm tra các peer đã join vào channel
-- Debug các vấn đề về kết nối đến blockchain network
-
-Nếu gặp lỗi, script sẽ hiển thị thông báo lỗi chi tiết để giúp xác định nguyên nhân:
-- "channel not found": Channel chưa được tạo
-- "access denied": Admin chưa có quyền truy cập
-- "peer not found": Peer chưa join vào channel
+MIT License

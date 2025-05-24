@@ -184,20 +184,44 @@ router.post('/login', async (req, res) => {
  *         description: Server error
  */
 router.post('/issue', async (req, res) => {
+  let cert = null;
   try {
     // 1. Lưu vào MongoDB
-    const cert = await Certificate.create(req.body);
-    // 2. Sinh Merkle root từ dữ liệu chứng chỉ
+    cert = await Certificate.create(req.body);
+
+    // 2. Lấy thông tin publicKey của university và student
+    const university = await University.findOne({ email: req.body.universityEmail });
+    const student = await Student.findOne({ email: req.body.studentEmail });
+    if (!university || !student) throw new Error('University or student not found');
+
+    // 3. Sinh Merkle root từ dữ liệu chứng chỉ
     const values = Object.values(req.body);
     const merkleRoot = encryption.generateMerkleRoot(values);
-    // 3. Ghi lên blockchain
+
+    // 4. Sinh chữ ký số (giả lập, thực tế cần privateKey)
+    const universitySignature = encryption.createDigitalSignature(merkleRoot, university.publicKey);
+    const studentSignature = encryption.createDigitalSignature(merkleRoot, student.publicKey);
+
+    // 5. Ghi lên blockchain với đúng 7 tham số
     await fabric.invokeChaincode(
       req.body.universityEmail, // userId (identity)
-      'issueCertificate', // function name trên chaincode
-      [JSON.stringify({ ...req.body, merkleRoot })]
+      'issueCertificate',
+      [
+        merkleRoot, // certHash
+        universitySignature,
+        studentSignature,
+        req.body.dateOfIssue,
+        req.body.certificateId,
+        university.publicKey,
+        student.publicKey
+      ]
     );
     res.status(201).json({ certificate: cert, merkleRoot });
   } catch (err) {
+    // Nếu đã lưu vào DB mà blockchain lỗi thì rollback
+    if (cert && cert._id) {
+      await Certificate.deleteOne({ _id: cert._id });
+    }
     res.status(500).json({ error: err.message });
   }
 });

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Form, Button, Alert, Card } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -35,7 +36,7 @@ const Register = () => {
       setLoading(true);
       // Xóa token cũ trước khi đăng ký để tránh lỗi header quá lớn
       localStorage.removeItem('token');
-      delete window.axios?.defaults?.headers?.common?.['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
       await register({
         name: formData.name,
         email: formData.email,

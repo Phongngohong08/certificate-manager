@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
+const { Wallets } = require('fabric-network');
 
 const walletDir = path.join(process.cwd(), 'wallet');
 if (!fs.existsSync(walletDir)) {
@@ -32,10 +33,17 @@ function generateKeyPair() {
   };
 }
 
-function saveToWallet(email, publicKey, privateKey) {
-  const filePath = path.join(walletDir, email + '.json');
-  const data = { publicKey, privateKey };
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+async function saveToFabricWallet(email, publicKey, privateKey) {
+  const wallet = await Wallets.newFileSystemWallet(walletDir);
+  const x509Identity = {
+    credentials: {
+      certificate: publicKey, // giả lập, thực tế cần certificate
+      privateKey: privateKey,
+    },
+    mspId: 'Org1MSP',
+    type: 'X.509',
+  };
+  await wallet.put(email, x509Identity);
 }
 
 /**
@@ -47,10 +55,9 @@ async function registerUser(email) {
   try {
     // Tạo cặp khóa
     const keys = generateKeyPair();
-    // Lưu vào ví (wallet)
-    saveToWallet(email, keys.publicKey, keys.privateKey);
-    // Trong thực tế, cần đăng ký user với Fabric CA
-    // Hiện tại chỉ giả lập và trả về cặp khóa
+    // Lưu vào ví Fabric chuẩn
+    await saveToFabricWallet(email, keys.publicKey, keys.privateKey);
+    // Trong thực tế, cần đăng ký user với Fabric CA để lấy certificate thật
     return {
       publicKey: keys.publicKey,
       success: true,

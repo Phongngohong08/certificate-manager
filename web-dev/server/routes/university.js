@@ -10,7 +10,60 @@ const enrollment = require('../services/enrollment');
 const jwt = require('jsonwebtoken');
 const { authenticateJWT } = require('../middleware/auth-middleware');
 
-// University registration
+/**
+ * @swagger
+ * /api/university/register:
+ *   post:
+ *     summary: Register a new university
+ *     tags: [Universities]
+ *     description: Register a new university in the system and generates blockchain identity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - description
+ *               - location
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: University name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: University email address
+ *               description:
+ *                 type: string
+ *                 description: Brief description of the university
+ *               location:
+ *                 type: string
+ *                 description: Physical location of the university
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Password for university account
+ *     responses:
+ *       201:
+ *         description: University registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 university:
+ *                   type: object
+ *       400:
+ *         description: Bad request - University already exists or invalid data
+ *       500:
+ *         description: Server error
+ */
 router.post('/register', async (req, res) => {
   try {
     const { name, email, description, location, password } = req.body;
@@ -35,7 +88,51 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// University login (JWT)
+/**
+ * @swagger
+ * /api/university/login:
+ *   post:
+ *     summary: University login
+ *     tags: [Universities]
+ *     description: Authenticate a university user and return a JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: University email address
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: University password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 university:
+ *                   $ref: '#/components/schemas/University'
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for authentication
+ *       401:
+ *         description: Invalid credentials
+ *       404:
+ *         description: University not found
+ *       500:
+ *         description: Server error
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -51,7 +148,41 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Issue certificate (MongoDB + Blockchain)
+/**
+ * @swagger
+ * /api/university/issue:
+ *   post:
+ *     summary: Issue a new certificate
+ *     tags: [Universities]
+ *     description: Issue a new academic certificate and store it in MongoDB and on the blockchain
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Certificate'
+ *     responses:
+ *       201:
+ *         description: Certificate issued successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 certificate:
+ *                   $ref: '#/components/schemas/Certificate'
+ *                 merkleRoot:
+ *                   type: string
+ *                   description: Merkle root hash of certificate data
+ *       400:
+ *         description: Invalid certificate data
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
 router.post('/issue', async (req, res) => {
   try {
     // 1. Lưu vào MongoDB
@@ -82,7 +213,34 @@ router.get('/certificates', async (req, res) => {
   }
 });
 
-// Dashboard tổng hợp dữ liệu từ blockchain và MongoDB
+/**
+ * @swagger
+ * /api/university/dashboard:
+ *   get:
+ *     summary: Get university dashboard data
+ *     tags: [Universities]
+ *     description: Retrieve dashboard data for university including certificates from both blockchain and MongoDB
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 dashboard:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Unauthorized - No JWT token provided
+ *       403:
+ *         description: Forbidden - Invalid JWT token
+ *       500:
+ *         description: Server error
+ */
 router.get('/dashboard', authenticateJWT, async (req, res) => {
   try {
     // Lấy dữ liệu từ blockchain (giả lập)

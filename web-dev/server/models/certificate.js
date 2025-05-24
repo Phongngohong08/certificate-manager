@@ -1,6 +1,57 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Certificate:
+ *       type: object
+ *       required:
+ *         - studentName
+ *         - studentEmail
+ *         - universityName
+ *         - universityEmail
+ *         - major
+ *         - departmentName
+ *         - cgpa
+ *         - dateOfIssue
+ *         - certificateId
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated MongoDB ID
+ *         studentName:
+ *           type: string
+ *           description: Name of the student
+ *         studentEmail:
+ *           type: string
+ *           format: email
+ *           description: Email address of the student
+ *         universityName:
+ *           type: string
+ *           description: Name of the issuing university
+ *         universityEmail:
+ *           type: string
+ *           format: email
+ *           description: Email address of the issuing university
+ *         major:
+ *           type: string
+ *           description: Student's major field of study
+ *         departmentName:
+ *           type: string
+ *           description: Name of the department
+ *         cgpa:
+ *           type: string
+ *           description: Cumulative Grade Point Average
+ *         dateOfIssue:
+ *           type: string
+ *           format: date
+ *           description: Date when certificate was issued
+ *         certificateId:
+ *           type: string
+ *           description: Unique identifier for the certificate
+ */
 const certificateSchema = new mongoose.Schema({
   studentName: {
     type: String,

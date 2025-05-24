@@ -1,5 +1,22 @@
 const jwt = require('jsonwebtoken');
 
+/**
+ * Middleware to authenticate JWT tokens
+ * Used with Swagger via the bearerAuth security scheme
+ * 
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   responses:
+ *     UnauthorizedError:
+ *       description: Access token is missing
+ *     ForbiddenError:
+ *       description: Access token is invalid
+ */
 function authenticateJWT(req, res, next) {
   const authHeader = req.headers.authorization;
   if (authHeader) {

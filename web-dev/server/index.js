@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
+const swagger = require('./swagger');
 
 const app = express();
 
@@ -33,13 +34,41 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/blockchai
   });
 
 // API routes
+// Serve static files from the public directory
+app.use(express.static('public'));
+
+// Swagger API Documentation
+app.use('/api-docs', swagger.serve, swagger.setup);
+
+// Set up custom Swagger UI
+swagger.serveCustomUI(app);
+
+// API routes
 app.use('/api/university', require('./routes/university'));
 app.use('/api/student', require('./routes/student'));
 app.use('/api/certificate', require('./routes/certificate'));
 app.use('/api/verify', require('./routes/verify'));
 app.use('/api', require('./routes/api'));
 
-// API routes placeholder
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: API health check
+ *     tags: [Health]
+ *     description: Check if the API is running properly
+ *     responses:
+ *       200:
+ *         description: API is running properly
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ */
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });
 });

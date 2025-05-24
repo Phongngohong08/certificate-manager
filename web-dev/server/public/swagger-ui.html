@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blockchain Academic Certificates API Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.4.2/swagger-ui.css">
+  <link rel="stylesheet" type="text/css" href="/css/swagger-custom.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+    
+    /* Custom navbar */
+    .custom-navbar {
+      background-color: #0f2d52;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .navbar-brand img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    
+    .navbar-brand span {
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+    
+    .navbar-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      padding: 8px 15px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .navbar-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Active link */
+    .navbar-links a.active {
+      background-color: #27ae60;
+    }
+    
+    /* Floating version badge */
+    .version-badge {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background-color: #27ae60;
+      color: white;
+      padding: 8px 15px;
+      border-radius: 20px;
+      font-size: 0.9em;
+      font-weight: 500;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Container for the Swagger UI */
+    #swagger-ui {
+      margin: 0;
+      padding: 20px;
+    }
+    
+    /* Loading indicator */
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+    }
+    
+    .loading-spinner {
+      border: 5px solid rgba(0, 0, 0, 0.1);
+      border-top: 5px solid #0f2d52;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading p {
+      margin-top: 15px;
+      font-size: 1.2em;
+      color: #0f2d52;
+    }
+    
+    /* Footer */
+    .footer {
+      background-color: #0f2d52;
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <!-- Custom navbar -->
+  <div class="custom-navbar">
+    <a href="/" class="navbar-brand">
+      <img src="/images/logo.svg" alt="Blockchain Academic Certificates">
+      <span>Academic Certificates API</span>
+    </a>
+    <div class="navbar-links">
+      <a href="/api-docs" class="active">API Documentation</a>
+      <a href="/api/health" target="_blank">Health Check</a>
+      <a href="https://github.com/yourusername/blockchain-academic-certificates" target="_blank">GitHub</a>
+    </div>
+  </div>
+  
+  <!-- Loading indicator -->
+  <div class="loading" id="loading">
+    <div class="loading-spinner"></div>
+    <p>Loading API Documentation...</p>
+  </div>
+  
+  <!-- Swagger UI will be rendered here -->
+  <div id="swagger-ui"></div>
+  
+  <!-- Version badge -->
+  <div class="version-badge">v1.0.0</div>
+  
+  <!-- Footer -->
+  <div class="footer">
+    © 2025 Blockchain Academic Certificates. All rights reserved.
+  </div>
+  
+  <!-- Scripts -->
+  <script src="https://unpkg.com/swagger-ui-dist@5.4.2/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5.4.2/swagger-ui-standalone-preset.js"></script>
+  <script src="/js/swagger-enhancer.js"></script>
+  <script>
+    window.onload = function() {
+      const ui = SwaggerUIBundle({
+        url: "/api-spec.json", // This should be an endpoint that serves your swagger JSON
+        dom_id: '#swagger-ui',
+        deepLinking: true,
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        plugins: [
+          SwaggerUIBundle.plugins.DownloadUrl
+        ],
+        layout: "StandaloneLayout",
+        docExpansion: "none", // Start with all sections collapsed
+        defaultModelsExpandDepth: -1, // Hide the models by default
+        displayRequestDuration: true, // Show the request duration
+        filter: true, // Enable filtering of operations
+        tagsSorter: "alpha", // Sort tags alphabetically
+        operationsSorter: "alpha", // Sort operations alphabetically
+      });
+      
+      // Hide loading spinner when Swagger UI is rendered
+      setTimeout(function() {
+        document.getElementById('loading').style.display = 'none';
+      }, 1000);
+      
+      window.ui = ui;
+    };
+  </script>
+</body>
+</html>

@@ -2,7 +2,28 @@ const express = require('express');
 const router = express.Router();
 const Certificate = require('../models/certificate');
 
-// Get all certificates
+/**
+ * @swagger
+ * /api/certificate:
+ *   get:
+ *     summary: Get all certificates
+ *     tags: [Certificates]
+ *     description: Retrieve a list of all certificates in the system
+ *     responses:
+ *       200:
+ *         description: A list of certificates
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 certificates:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/Certificate'
+ *       500:
+ *         description: Server error
+ */
 router.get('/', async (req, res) => {
   try {
     const certs = await Certificate.find();
@@ -12,7 +33,35 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get certificate by ID
+/**
+ * @swagger
+ * /api/certificate/{id}:
+ *   get:
+ *     summary: Get a certificate by ID
+ *     tags: [Certificates]
+ *     description: Retrieve a specific certificate by its MongoDB ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: The ID of the certificate to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A certificate object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 certificate:
+ *                   $ref: '#/components/schemas/Certificate'
+ *       404:
+ *         description: Certificate not found
+ *       500:
+ *         description: Server error
+ */
 router.get('/:id', async (req, res) => {
   try {
     const cert = await Certificate.findById(req.params.id);

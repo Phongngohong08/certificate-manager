@@ -1,6 +1,36 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     Student:
+ *       type: object
+ *       required:
+ *         - email
+ *         - name
+ *         - password
+ *         - publicKey
+ *       properties:
+ *         _id:
+ *           type: string
+ *           description: Auto-generated MongoDB ID
+ *         email:
+ *           type: string
+ *           format: email
+ *           description: Student's email address
+ *         name:
+ *           type: string
+ *           description: Student's full name
+ *         password:
+ *           type: string
+ *           format: password
+ *           description: Hashed password (not returned in responses)
+ *         publicKey:
+ *           type: string
+ *           description: Public key for blockchain operations
+ */
 const studentSchema = new mongoose.Schema({
   email: {
     type: String,

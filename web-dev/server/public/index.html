@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blockchain Academic Certificates API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Montserrat', sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background-color: #f8f9fa;
+    }
+    
+    /* Custom navbar */
+    .custom-navbar {
+      background-color: #0f2d52;
+      color: white;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      color: white;
+    }
+    
+    .navbar-brand img {
+      height: 40px;
+      margin-right: 10px;
+    }
+    
+    .navbar-brand span {
+      font-size: 1.5em;
+      font-weight: 600;
+    }
+    
+    .navbar-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+      padding: 8px 15px;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .navbar-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Hero section */
+    .hero {
+      background: linear-gradient(135deg, #0f2d52 0%, #1a4789 100%);
+      color: white;
+      padding: 80px 0;
+      text-align: center;
+    }
+    
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+    
+    .hero h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+    
+    .hero p {
+      font-size: 1.2em;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+    
+    .btn {
+      display: inline-block;
+      background-color: #27ae60;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      margin: 5px;
+    }
+    
+    .btn:hover {
+      background-color: #219653;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      border: 2px solid white;
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Features section */
+    .features {
+      padding: 80px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 50px;
+      font-size: 2em;
+      color: #0f2d52;
+      position: relative;
+    }
+    
+    .section-title:after {
+      content: "";
+      position: absolute;
+      bottom: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 4px;
+      background-color: #27ae60;
+      border-radius: 2px;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    
+    .feature-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      padding: 30px;
+      transition: transform 0.3s ease;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      font-size: 2.5em;
+      color: #27ae60;
+      margin-bottom: 15px;
+    }
+    
+    .feature-title {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+      color: #0f2d52;
+    }
+    
+    .feature-description {
+      color: #666;
+    }
+    
+    /* API Endpoints section */
+    .endpoints {
+      background-color: #f1f5f9;
+      padding: 80px 20px;
+    }
+    
+    .endpoints-content {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .endpoint-list {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+    
+    .endpoint-item {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      transition: background-color 0.3s ease;
+    }
+    
+    .endpoint-item:last-child {
+      border-bottom: none;
+    }
+    
+    .endpoint-item:hover {
+      background-color: #f8f9fa;
+    }
+    
+    .endpoint-method {
+      display: inline-block;
+      padding: 5px 10px;
+      border-radius: 4px;
+      color: white;
+      font-weight: 600;
+      font-size: 0.85em;
+      margin-right: 10px;
+      min-width: 60px;
+      text-align: center;
+    }
+    
+    .method-get {
+      background-color: #61affe;
+    }
+    
+    .method-post {
+      background-color: #49cc90;
+    }
+    
+    .method-put {
+      background-color: #fca130;
+    }
+    
+    .method-delete {
+      background-color: #f93e3e;
+    }
+    
+    .endpoint-path {
+      font-family: monospace;
+      font-size: 1.1em;
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+    
+    .endpoint-description {
+      color: #666;
+      margin-top: 5px;
+      font-size: 0.9em;
+    }
+    
+    /* Getting started section */
+    .getting-started {
+      padding: 80px 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .code-block {
+      background-color: #282c34;
+      color: #abb2bf;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+      font-family: monospace;
+      line-height: 1.5;
+      position: relative;
+      overflow-x: auto;
+    }
+    
+    .code-block pre {
+      margin: 0;
+    }
+    
+    .code-block .comment {
+      color: #5c6370;
+    }
+    
+    .code-block .string {
+      color: #98c379;
+    }
+    
+    .code-block .keyword {
+      color: #c678dd;
+    }
+    
+    .code-block .function {
+      color: #61afef;
+    }
+    
+    .copy-button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 0.85em;
+      transition: background-color 0.3s ease;
+    }
+    
+    .copy-button:hover {
+      background-color: #555;
+    }
+    
+    /* Footer */
+    .footer {
+      background-color: #0f2d52;
+      color: white;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      text-align: left;
+    }
+    
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .footer-logo img {
+      height: 30px;
+      margin-right: 10px;
+    }
+    
+    .footer-logo span {
+      font-weight: 600;
+      font-size: 1.2em;
+    }
+    
+    .footer-description {
+      color: #ddd;
+      margin-bottom: 20px;
+    }
+    
+    .footer h4 {
+      margin-bottom: 15px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .footer h4:after {
+      content: "";
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background-color: #27ae60;
+    }
+    
+    .footer-links {
+      list-style: none;
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a {
+      color: #ddd;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: #27ae60;
+    }
+    
+    .footer-bottom {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9em;
+      color: #aaa;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 2em;
+      }
+      
+      .custom-navbar {
+        flex-direction: column;
+        padding: 15px 10px;
+      }
+      
+      .navbar-brand {
+        margin-bottom: 15px;
+      }
+      
+      .navbar-links {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+      
+      .navbar-links a {
+        margin: 0 10px;
+        padding: 5px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Custom navbar -->
+  <div class="custom-navbar">
+    <a href="/" class="navbar-brand">
+      <img src="/images/logo.svg" alt="Blockchain Academic Certificates">
+      <span>Academic Certificates API</span>
+    </a>
+    <div class="navbar-links">
+      <a href="/api-docs">API Documentation</a>
+      <a href="/api-custom">Custom UI</a>
+      <a href="/api/health" target="_blank">Health Check</a>
+    </div>
+  </div>
+  
+  <!-- Hero section -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Blockchain Academic Certificates API</h1>
+      <p>A secure and verifiable platform for issuing, managing and verifying academic certificates using blockchain technology</p>
+      <div class="hero-buttons">
+        <a href="/api-docs" class="btn">View API Documentation</a>
+        <a href="/api-custom" class="btn btn-secondary">Custom UI</a>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Features section -->
+  <section class="features">
+    <h2 class="section-title">Key Features</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🔐</div>
+        <h3 class="feature-title">Secure Authentication</h3>
+        <p class="feature-description">JWT-based authentication system for universities and students with role-based access control.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📜</div>
+        <h3 class="feature-title">Certificate Issuance</h3>
+        <p class="feature-description">Issue tamper-proof academic certificates with blockchain verification for maximum security.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✅</div>
+        <h3 class="feature-title">Verification</h3>
+        <p class="feature-description">Instantly verify the authenticity of academic certificates through cryptographic proofs.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔍</div>
+        <h3 class="feature-title">Selective Disclosure</h3>
+        <p class="feature-description">Students can selectively share specific certificate details while maintaining privacy.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3 class="feature-title">Interoperability</h3>
+        <p class="feature-description">RESTful API design allows easy integration with various educational platforms and systems.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3 class="feature-title">Dashboard Analytics</h3>
+        <p class="feature-description">Comprehensive dashboards for universities and students to manage certificates.</p>
+      </div>
+    </div>
+  </section>
+  
+  <!-- API Endpoints section -->
+  <section class="endpoints">
+    <div class="endpoints-content">
+      <h2 class="section-title">API Endpoints</h2>
+      <div class="endpoint-list">
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/university/register</div>
+          <div class="endpoint-description">Register a new university in the system</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/university/login</div>
+          <div class="endpoint-description">Authenticate a university and receive a JWT token</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/student/register</div>
+          <div class="endpoint-description">Register a new student in the system</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/student/login</div>
+          <div class="endpoint-description">Authenticate a student and receive a JWT token</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/university/issue</div>
+          <div class="endpoint-description">Issue a new academic certificate on the blockchain</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-get">GET</span>
+          <div class="endpoint-path">/api/certificate/{id}</div>
+          <div class="endpoint-description">Retrieve a specific certificate by ID</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-post">POST</span>
+          <div class="endpoint-path">/api/verify/verify</div>
+          <div class="endpoint-description">Verify the authenticity of a certificate</div>
+        </div>
+        <div class="endpoint-item">
+          <span class="endpoint-method method-get">GET</span>
+          <div class="endpoint-path">/api/generateProof</div>
+          <div class="endpoint-description">Generate a selective disclosure proof for a certificate</div>
+        </div>
+      </div>
+    </div>
+  </section>
+  
+  <!-- Getting started section -->
+  <section class="getting-started">
+    <h2 class="section-title">Getting Started</h2>
+    <p>Here's a quick guide to using our API:</p>
+    
+    <h3>1. Authentication</h3>
+    <div class="code-block">
+      <button class="copy-button">Copy</button>
+      <pre><span class="comment">// Login as a university</span>
+<span class="keyword">fetch</span>(<span class="string">'http://localhost:5000/api/university/login'</span>, {
+  <span class="keyword">method</span>: <span class="string">'POST'</span>,
+  <span class="keyword">headers</span>: {
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+  },
+  <span class="keyword">body</span>: <span class="keyword">JSON</span>.<span class="function">stringify</span>({
+    <span class="string">'email'</span>: <span class="string">'university@example.com'</span>,
+    <span class="string">'password'</span>: <span class="string">'your-password'</span>
+  })
+})
+.<span class="function">then</span>(response => response.json())
+.<span class="function">then</span>(data => {
+  <span class="keyword">const</span> token = data.token;
+  <span class="comment">// Store this token for authenticated requests</span>
+});</pre>
+    </div>
+    
+    <h3>2. Issue a Certificate</h3>
+    <div class="code-block">
+      <button class="copy-button">Copy</button>
+      <pre><span class="comment">// Issue a certificate (authenticated request)</span>
+<span class="keyword">fetch</span>(<span class="string">'http://localhost:5000/api/university/issue'</span>, {
+  <span class="keyword">method</span>: <span class="string">'POST'</span>,
+  <span class="keyword">headers</span>: {
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>,
+    <span class="string">'Authorization'</span>: <span class="string">'Bearer '</span> + token
+  },
+  <span class="keyword">body</span>: <span class="keyword">JSON</span>.<span class="function">stringify</span>({
+    <span class="string">'studentName'</span>: <span class="string">'John Doe'</span>,
+    <span class="string">'studentEmail'</span>: <span class="string">'student@example.com'</span>,
+    <span class="string">'universityName'</span>: <span class="string">'Example University'</span>,
+    <span class="string">'universityEmail'</span>: <span class="string">'university@example.com'</span>,
+    <span class="string">'major'</span>: <span class="string">'Computer Science'</span>,
+    <span class="string">'departmentName'</span>: <span class="string">'School of Computing'</span>,
+    <span class="string">'cgpa'</span>: <span class="string">'3.8'</span>,
+    <span class="string">'dateOfIssue'</span>: <span class="string">'2025-05-24'</span>,
+    <span class="string">'certificateId'</span>: <span class="string">'CERT-2025-001'</span>
+  })
+});</pre>
+    </div>
+    
+    <h3>3. Verify a Certificate</h3>
+    <div class="code-block">
+      <button class="copy-button">Copy</button>
+      <pre><span class="comment">// Verify a certificate using proof</span>
+<span class="keyword">fetch</span>(<span class="string">'http://localhost:5000/api/verify/verify'</span>, {
+  <span class="keyword">method</span>: <span class="string">'POST'</span>,
+  <span class="keyword">headers</span>: {
+    <span class="string">'Content-Type'</span>: <span class="string">'application/json'</span>
+  },
+  <span class="keyword">body</span>: <span class="keyword">JSON</span>.<span class="function">stringify</span>({
+    <span class="string">'certUUID'</span>: <span class="string">'certificate-uuid'</span>,
+    <span class="string">'disclosedData'</span>: {
+      <span class="string">'studentName'</span>: <span class="string">'John Doe'</span>,
+      <span class="string">'major'</span>: <span class="string">'Computer Science'</span>
+    },
+    <span class="string">'proof'</span>: <span class="comment">/* proof object from generateProof endpoint */</span>
+  })
+});</pre>
+    </div>
+  </section>
+  
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div>
+        <div class="footer-logo">
+          <img src="/images/logo.svg" alt="Blockchain Academic Certificates">
+          <span>Academic Certificates API</span>
+        </div>
+        <p class="footer-description">A secure and verifiable platform for issuing, managing and verifying academic certificates using blockchain technology.</p>
+      </div>
+      <div>
+        <h4>Documentation</h4>
+        <ul class="footer-links">
+          <li><a href="/api-docs">API Reference</a></li>
+          <li><a href="/swagger/DEVELOPER_GUIDE.md">Developer Guide</a></li>
+          <li><a href="/swagger/SECURITY.md">Security Guide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Resources</h4>
+        <ul class="footer-links">
+          <li><a href="https://github.com/yourusername/blockchain-academic-certificates">GitHub Repository</a></li>
+          <li><a href="#">Technical White Paper</a></li>
+          <li><a href="#">FAQ</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Blockchain Academic Certificates. All rights reserved.</p>
+    </div>
+  </footer>
+  
+  <script>
+    // Simple copy functionality for code blocks
+    document.querySelectorAll('.copy-button').forEach(button => {
+      button.addEventListener('click', () => {
+        const codeBlock = button.nextElementSibling;
+        const code = codeBlock.textContent;
+        
+        navigator.clipboard.writeText(code).then(() => {
+          button.textContent = 'Copied!';
+          setTimeout(() => {
+            button.textContent = 'Copy';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy: ', err);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

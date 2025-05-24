@@ -7,7 +7,50 @@ const jwt = require('jsonwebtoken');
 const { authenticateJWT } = require('../middleware/auth-middleware');
 const enrollment = require('../services/enrollment');
 
-// Student registration
+/**
+ * @swagger
+ * /api/student/register:
+ *   post:
+ *     summary: Register a new student
+ *     tags: [Students]
+ *     description: Register a new student in the system and generates blockchain identity
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - email
+ *               - password
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Student's full name
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Student's email address
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Password for student account
+ *     responses:
+ *       201:
+ *         description: Student registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 student:
+ *                   type: object
+ *       400:
+ *         description: Bad request - Student already exists or invalid data
+ *       500:
+ *         description: Server error
+ */
 router.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -30,7 +73,51 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Student login (JWT)
+/**
+ * @swagger
+ * /api/student/login:
+ *   post:
+ *     summary: Student login
+ *     tags: [Students]
+ *     description: Authenticate a student user and return a JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Student email address
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: Student password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 student:
+ *                   $ref: '#/components/schemas/Student'
+ *                 token:
+ *                   type: string
+ *                   description: JWT token for authentication
+ *       401:
+ *         description: Invalid credentials
+ *       404:
+ *         description: Student not found
+ *       500:
+ *         description: Server error
+ */
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -46,7 +133,34 @@ router.post('/login', async (req, res) => {
   }
 });
 
-// Dashboard (bảo vệ bằng JWT)
+/**
+ * @swagger
+ * /api/student/dashboard:
+ *   get:
+ *     summary: Get student dashboard data
+ *     tags: [Students]
+ *     description: Retrieve dashboard data for student including certificates from both blockchain and MongoDB
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Dashboard data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 dashboard:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Unauthorized - No JWT token provided
+ *       403:
+ *         description: Forbidden - Invalid JWT token
+ *       500:
+ *         description: Server error
+ */
 router.get('/dashboard', authenticateJWT, async (req, res) => {
   try {
     // Lấy dữ liệu từ blockchain (giả lập)

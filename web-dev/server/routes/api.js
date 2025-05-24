@@ -4,6 +4,56 @@ const Certificate = require('../models/certificate');
 const fabric = require('../services/fabric');
 const certificateService = require('../services/certificate-service');
 
+/**
+ * @swagger
+ * /api/generateProof:
+ *   get:
+ *     summary: Generate a certificate proof
+ *     tags: [API]
+ *     description: Generate a Merkle proof for selected certificate attributes that can be used for verification
+ *     parameters:
+ *       - in: query
+ *         name: sharedAttributes
+ *         required: true
+ *         description: Comma-separated list of attributes to include in the proof
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: certUUID
+ *         required: true
+ *         description: Certificate UUID to generate proof for
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: email
+ *         required: true
+ *         description: Email of the user requesting the proof
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Generated proof and disclosed data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 proof:
+ *                   type: object
+ *                   description: Cryptographic proof for the certificate
+ *                 disclosedData:
+ *                   type: object
+ *                   description: Selected certificate attributes
+ *                 certUUID:
+ *                   type: string
+ *                   description: Certificate UUID
+ *       400:
+ *         description: Missing parameters
+ *       404:
+ *         description: Certificate not found
+ *       500:
+ *         description: Server error
+ */
 // Sinh Merkle proof và trả về dữ liệu chứng chỉ đã chọn
 router.get('/generateProof', async (req, res) => {
   try {

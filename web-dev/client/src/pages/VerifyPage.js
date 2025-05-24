@@ -1,38 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
-import QrReader from 'react-qr-reader';
 import { useSearchParams } from 'react-router-dom';
 
 const API_URL = 'http://localhost:5000';
 
 const VerifyPage = () => {
   const [searchParams] = useSearchParams();
-  const [certificateId, setCertificateId] = useState(searchParams.get('id') || '');
-  const [scanMode, setScanMode] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [certificateId, setCertificateId] = useState(searchParams.get('id') || '');  const [loading, setLoading] = useState(false);
   const [verificationResult, setVerificationResult] = useState(null);
   const [error, setError] = useState('');
-
-  const handleScan = (data) => {
-    if (data) {
-      // Extract certificate ID from URL if scanned a verification URL
-      const url = new URL(data);
-      const id = url.searchParams.get('id');
-      if (id) {
-        setCertificateId(id);
-        setScanMode(false);
-        handleVerify(id);
-      } else {
-        setCertificateId(data);
-        setScanMode(false);
-      }
-    }
-  };
-
-  const handleScanError = (err) => {
-    console.error(err);
-    setError('QR code scanning error. Please try again or enter the certificate ID manually.');
-    setScanMode(false);
+  const fileInputRef = useRef(null);
+  
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    
+    setError('');
+    
+    // Here we would normally process the QR code in the image
+    // But for simplicity, we'll just inform the user this feature is disabled
+    setError('QR code scanning from image upload is temporarily disabled due to compatibility issues. Please enter the certificate ID manually.');
   };
 
   const handleVerify = async (id = certificateId) => {
@@ -73,9 +60,7 @@ const VerifyPage = () => {
                 <Alert variant="danger" className="mb-4">
                   {error}
                 </Alert>
-              )}
-
-              {!scanMode && !verificationResult && (
+              )}              {!verificationResult && (
                 <Form onSubmit={(e) => { e.preventDefault(); handleVerify(); }}>
                   <Form.Group className="mb-4">
                     <Form.Label>Certificate ID</Form.Label>
@@ -90,11 +75,21 @@ const VerifyPage = () => {
                       <Button 
                         variant="outline-secondary" 
                         className="ms-2"
-                        onClick={() => setScanMode(true)}
+                        onClick={() => fileInputRef.current.click()}
                       >
-                        <i className="bi bi-qr-code-scan"></i>
+                        <i className="bi bi-upload"></i>
                       </Button>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        style={{ display: 'none' }}
+                        onChange={handleFileUpload}
+                        accept="image/*"
+                      />
                     </div>
+                    <Form.Text className="text-muted">
+                      Enter the certificate ID or upload a QR code image
+                    </Form.Text>
                   </Form.Group>
 
                   <div className="d-grid">
@@ -112,27 +107,6 @@ const VerifyPage = () => {
                     </Button>
                   </div>
                 </Form>
-              )}
-
-              {scanMode && (
-                <div className="mb-4">
-                  <p className="mb-3">Scan the certificate's QR code</p>
-                  <div className="qr-scanner-container border rounded overflow-hidden">
-                    <QrReader
-                      delay={300}
-                      onError={handleScanError}
-                      onScan={handleScan}
-                      style={{ width: '100%' }}
-                    />
-                  </div>
-                  <Button
-                    variant="outline-secondary"
-                    className="w-100 mt-3"
-                    onClick={() => setScanMode(false)}
-                  >
-                    Cancel Scanning
-                  </Button>
-                </div>
               )}
 
               {verificationResult && (

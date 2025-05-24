@@ -40,7 +40,9 @@ const Register = () => {
       });
       navigate('/');
     } catch (error) {
-      setError(error.response?.data?.error || 'Failed to create account');
+      // Log full error for debugging
+      console.error('Register error:', error, error?.response);
+      setError(error.response?.data?.error || error.message || 'Failed to create account');
     } finally {
       setLoading(false);
     }
@@ -112,4 +114,4 @@ const Register = () => {
   );
 };
 
-export default Register; 
+export default Register;

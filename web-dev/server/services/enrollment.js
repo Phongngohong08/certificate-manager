@@ -1,4 +1,11 @@
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
+
+const walletDir = path.join(process.cwd(), 'wallet');
+if (!fs.existsSync(walletDir)) {
+  fs.mkdirSync(walletDir);
+}
 
 /**
  * Tạo cặp khóa public/private cho user registration
@@ -25,6 +32,12 @@ function generateKeyPair() {
   };
 }
 
+function saveToWallet(email, publicKey, privateKey) {
+  const filePath = path.join(walletDir, email + '.json');
+  const data = { publicKey, privateKey };
+  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+}
+
 /**
  * Đăng ký user với Fabric CA (giả lập)
  * @param {string} email Email của user
@@ -34,10 +47,10 @@ async function registerUser(email) {
   try {
     // Tạo cặp khóa
     const keys = generateKeyPair();
-    
+    // Lưu vào ví (wallet)
+    saveToWallet(email, keys.publicKey, keys.privateKey);
     // Trong thực tế, cần đăng ký user với Fabric CA
     // Hiện tại chỉ giả lập và trả về cặp khóa
-    
     return {
       publicKey: keys.publicKey,
       success: true,

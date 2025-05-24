@@ -8,19 +8,19 @@ The API documentation is available at the following URLs when the server is runn
 
 1. **Standard Swagger UI**: 
    ```
-   http://localhost:5000/api-docs
+   http://localhost:3002/api-docs
    ```
 
 2. **Custom UI** (recommended):
    ```
-   http://localhost:5000/api-custom
+   http://localhost:3002/api-custom
    ```
    
    Our custom UI includes enhanced features like dark mode, improved search, and better visual organization.
 
 3. **Landing Page**:
    ```
-   http://localhost:5000/
+   http://localhost:3002/
    ```
    
    The landing page provides an overview of the API and quick links to documentation.

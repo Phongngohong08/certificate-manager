@@ -37,6 +37,13 @@ const validator = require('validator');
  *           type: string
  *           format: password
  *           description: Hashed password (not returned in responses)
+ *       example:
+ *         email: "admin@hust.edu.vn"
+ *         name: "Hanoi University of Science and Technology"
+ *         description: "Top technical university in Vietnam"
+ *         location: "1 Dai Co Viet, Hai Ba Trung, Ha Noi"
+ *         password: "12345678"
+ *         publicKey: "04b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1"
  */
 const universitySchema = new mongoose.Schema({
   email: {

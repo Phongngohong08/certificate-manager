@@ -51,6 +51,16 @@ const validator = require('validator');
  *         certificateId:
  *           type: string
  *           description: Unique identifier for the certificate
+ *       example:
+ *         studentName: "Nguyen Van A"
+ *         studentEmail: "student1@university.edu"
+ *         universityName: "Hanoi University of Science and Technology"
+ *         universityEmail: "admin@hust.edu.vn"
+ *         major: "Information Technology"
+ *         departmentName: "School of Information and Communication Technology"
+ *         cgpa: "3.75"
+ *         dateOfIssue: "2025-05-24"
+ *         certificateId: "HUST-2025-0001"
  */
 const certificateSchema = new mongoose.Schema({
   studentName: {

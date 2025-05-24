@@ -5,15 +5,25 @@ const Certificate = require('../models/certificate');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { authenticateJWT } = require('../middleware/auth-middleware');
+const enrollment = require('../services/enrollment');
 
 // Student registration
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, publicKey } = req.body;
+    const { name, email, password } = req.body;
     const existing = await Student.findOne({ email });
     if (existing) return res.status(400).json({ error: 'Student already exists' });
+    
+    // Tự động tạo public key thay vì yêu cầu người dùng nhập
+    const keys = await enrollment.registerUser(email);
+    
     const hashed = await bcrypt.hash(password, 10);
-    const student = await Student.create({ name, email, password: hashed, publicKey });
+    const student = await Student.create({
+      name,
+      email,
+      password: hashed,
+      publicKey: keys.publicKey
+    });
     res.status(201).json({ student });
   } catch (err) {
     res.status(500).json({ error: err.message });

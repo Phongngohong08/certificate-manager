@@ -6,17 +6,29 @@ const Certificate = require('../models/certificate');
 const bcrypt = require('bcryptjs');
 const fabric = require('../services/fabric');
 const encryption = require('../services/encryption');
+const enrollment = require('../services/enrollment');
 const jwt = require('jsonwebtoken');
 const { authenticateJWT } = require('../middleware/auth-middleware');
 
 // University registration
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, description, location, password, publicKey } = req.body;
+    const { name, email, description, location, password } = req.body;
     const existing = await University.findOne({ email });
     if (existing) return res.status(400).json({ error: 'University already exists' });
+    
+    // Tự động tạo public key thay vì yêu cầu người dùng nhập
+    const keys = await enrollment.registerUser(email);
+    
     const hashed = await bcrypt.hash(password, 10);
-    const university = await University.create({ name, email, description, location, password: hashed, publicKey });
+    const university = await University.create({
+      name,
+      email,
+      description,
+      location,
+      password: hashed,
+      publicKey: keys.publicKey
+    });
     res.status(201).json({ university });
   } catch (err) {
     res.status(500).json({ error: err.message });

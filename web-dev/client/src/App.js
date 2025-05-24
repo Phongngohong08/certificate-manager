@@ -62,11 +62,7 @@ function App() {
             <>
               <input name="description" placeholder="Mô tả" onChange={handleChange} required />
               <input name="location" placeholder="Địa chỉ" onChange={handleChange} required />
-              <input name="publicKey" placeholder="Public Key" onChange={handleChange} required />
             </>
-          )}
-          {userType === 'student' && (
-            <input name="publicKey" placeholder="Public Key" onChange={handleChange} required />
           )}
           <button type="submit">Đăng ký</button>
         </form>

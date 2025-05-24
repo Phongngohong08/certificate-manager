@@ -16,6 +16,9 @@ let cookieParser = require('cookie-parser');
 let morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
+const compression = require('compression');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./config/swagger');
 
 //local imports
 let limiter = require('./middleware/rate-limiter-middleware');
@@ -33,11 +36,14 @@ let app = express();
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? process.env.FRONTEND_URL : 'http://localhost:3001',
-  credentials: true
+  origin: 'http://localhost:3000',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 //middleware
+app.use(compression());
 app.use(limiter.rateLimiterMiddlewareInMemory);
 app.use(morgan('dev'));
 app.use(express.json());
@@ -46,6 +52,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(helmet());
 
+// API Documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 
 //routers
 app.use('/', indexRouter);

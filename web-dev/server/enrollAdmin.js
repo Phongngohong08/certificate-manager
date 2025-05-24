@@ -19,7 +19,7 @@ async function main() {
     const wallet = await Wallets.newFileSystemWallet(walletPath);
 
     // Kiểm tra đã có admin chưa
-    const identity = await wallet.get('admin@hust.edu.vn');
+    const identity = await wallet.get('admin');
     if (identity) {
       console.log('Admin đã tồn tại trong wallet');
       return;
@@ -27,6 +27,12 @@ async function main() {
 
     // Enroll admin
     const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
+
+    // Kiểm tra loại private key trả về phải là ECDSA
+    if (!enrollment.key || !enrollment.key.type || !enrollment.key.type.includes('EC')) {
+      throw new Error('Private key trả về không phải ECDSA. Hãy chắc chắn Fabric CA cấu hình sinh ECDSA key.');
+    }
+
     const x509Identity = {
       credentials: {
         certificate: enrollment.certificate,
@@ -35,7 +41,7 @@ async function main() {
       mspId: 'Org1MSP',
       type: 'X.509',
     };
-    await wallet.put('admin@hust.edu.vn', x509Identity);
+    await wallet.put('admin', x509Identity);
     console.log('Enroll admin thành công và đã lưu vào wallet!');
   } catch (error) {
     console.error(`Enroll admin thất bại: ${error}`);

@@ -18,16 +18,21 @@ function generateMerkleRoot(values) {
   return nodes[0];
 }
 
-// Digital signature (placeholder, real implementation cần private key)
-function createDigitalSignature(data, privateKey) {
-  // TODO: Ký số thực tế bằng privateKey
-  return crypto.createHash('sha256').update(data + privateKey).digest('hex');
+// Digital signature thực sự bằng ECDSA private key PEM
+function createDigitalSignature(data, privateKeyPEM) {
+  const sign = crypto.createSign('SHA256');
+  sign.update(data);
+  sign.end();
+  // privateKeyPEM là chuỗi PEM lấy từ Fabric wallet
+  return sign.sign(privateKeyPEM, 'hex');
 }
 
-// Verify signature (placeholder)
-function verifySignature(data, signature, publicKey) {
-  // TODO: Xác thực thực tế bằng publicKey
-  return signature === crypto.createHash('sha256').update(data + publicKey).digest('hex');
+// Xác thực chữ ký số thực sự bằng ECDSA public key PEM
+function verifySignature(data, signatureHex, publicKeyPEM) {
+  const verify = crypto.createVerify('SHA256');
+  verify.update(data);
+  verify.end();
+  return verify.verify(publicKeyPEM, Buffer.from(signatureHex, 'hex'));
 }
 
 module.exports = { generateMerkleRoot, createDigitalSignature, verifySignature };

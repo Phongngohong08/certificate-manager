@@ -141,7 +141,7 @@ email:
 After adding your documentation:
 
 1. Restart the server
-2. Navigate to `http://localhost:5000/api-docs` in your browser
+2. Navigate to `http://localhost:3002/api-docs` in your browser
 3. Verify that your new endpoint appears in the Swagger UI
 4. Test the endpoint using the "Try it out" feature
 

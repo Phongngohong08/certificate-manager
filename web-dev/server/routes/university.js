@@ -9,6 +9,7 @@ const encryption = require('../services/encryption');
 const enrollment = require('../services/enrollment');
 const jwt = require('jsonwebtoken');
 const { authenticateJWT } = require('../middleware/auth-middleware');
+const walletUtils = require('../services/wallet-utils');
 
 /**
  * @swagger
@@ -198,9 +199,11 @@ router.post('/issue', async (req, res) => {
     const values = Object.values(req.body);
     const merkleRoot = encryption.generateMerkleRoot(values);
 
-    // 4. Sinh chữ ký số (giả lập, thực tế cần privateKey)
-    const universitySignature = encryption.createDigitalSignature(merkleRoot, university.publicKey);
-    const studentSignature = encryption.createDigitalSignature(merkleRoot, student.publicKey);
+    // 4. Lấy privateKey từ Fabric wallet để ký số thực sự
+    const universityPrivateKey = await walletUtils.getPrivateKeyFromWallet(req.body.universityEmail);
+    const studentPrivateKey = await walletUtils.getPrivateKeyFromWallet(req.body.studentEmail);
+    const universitySignature = encryption.createDigitalSignature(merkleRoot, universityPrivateKey);
+    const studentSignature = encryption.createDigitalSignature(merkleRoot, studentPrivateKey);
 
     // 5. Ghi lên blockchain với đúng 7 tham số
     await fabric.invokeChaincode(

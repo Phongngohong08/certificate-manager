@@ -9,12 +9,12 @@ if (!fs.existsSync(walletDir)) {
 }
 
 /**
- * Tạo cặp khóa public/private cho user registration
- * @returns {Object} Object chứa publicKey và privateKey
+ * Tạo cặp khóa public/private cho user registration (ECDSA, prime256v1)
+ * @returns {Object} Object chứa publicKey và privateKey ở dạng PEM
  */
 function generateKeyPair() {
-  const { publicKey, privateKey } = crypto.generateKeyPairSync('rsa', {
-    modulusLength: 2048,
+  const { publicKey, privateKey } = crypto.generateKeyPairSync('ec', {
+    namedCurve: 'prime256v1',
     publicKeyEncoding: {
       type: 'spki',
       format: 'pem'
@@ -24,11 +24,8 @@ function generateKeyPair() {
       format: 'pem'
     }
   });
-  
-  // Trả về public key dạng hex string để lưu vào DB
-  const publicKeyHex = Buffer.from(publicKey).toString('hex');
   return {
-    publicKey: publicKeyHex,
+    publicKey,
     privateKey
   };
 }

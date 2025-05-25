@@ -25,7 +25,7 @@ This repository contains the web development components for the Blockchain Acade
 
 The backend API includes comprehensive Swagger documentation:
 
-- **URL**: [http://localhost:5000/api-docs](http://localhost:5000/api-docs) (when server is running)
+- **URL**: [http://localhost:3002/api-docs](http://localhost:3002/api-docs) (when server is running)
 - **Features**: Interactive documentation for all API endpoints, including request/response schemas and authorization
 
 ### Documentation Resources

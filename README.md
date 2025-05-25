@@ -75,7 +75,7 @@ npm install
 npm start
 ```
 
-#### Frontend (ReactJS)
+#### Frontend (ReactJS) (Hiện tại front-end chưa fix xong dùng tạm swagger http://localhost:3002/api-docs)
 ```bash
 cd ../client
 cp .env.example .env # hoặc tự tạo file .env theo mẫu
@@ -96,7 +96,3 @@ npm start
     - `server/`: Backend Node.js/Express
     - `client/`: Frontend ReactJS
 - `resources/`: Tài nguyên và tài liệu
-
-## Giấy phép
-
-MIT License

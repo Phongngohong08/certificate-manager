@@ -6,19 +6,15 @@ import { useAuth } from '../contexts/AuthContext';
 const RegisterPage = () => {
   const [key, setKey] = useState('student');
   const [form, setForm] = useState({
+    // Common
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    // Student specific fields
-    studentId: '',
-    dateOfBirth: '',
-    program: '',
-    // University specific fields
-    universityId: '',
-    address: '',
-    website: '',
-    phoneNumber: '',
+    // University only
+    description: '',
+    location: '',
+    country: 'Vietnam',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,7 +32,6 @@ const RegisterPage = () => {
     setError('');
     setLoading(true);
 
-    // Validation
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match');
       setLoading(false);
@@ -44,26 +39,23 @@ const RegisterPage = () => {
     }
 
     try {
-      // Prepare data based on user type
-      const userData = key === 'student' 
-        ? {
-            name: form.name,
-            email: form.email,
-            password: form.password,
-            studentId: form.studentId,
-            dateOfBirth: form.dateOfBirth,
-            program: form.program
-          }
-        : {
-            name: form.name,
-            email: form.email,
-            password: form.password,
-            universityId: form.universityId,
-            address: form.address,
-            website: form.website,
-            phoneNumber: form.phoneNumber
-          };
-
+      let userData;
+      if (key === 'student') {
+        userData = {
+          name: form.name,
+          email: form.email,
+          password: form.password
+        };
+      } else {
+        userData = {
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          description: form.description,
+          location: form.location,
+          country: form.country
+        };
+      }
       await register(userData, key);
       setSuccess(true);
       setTimeout(() => navigate('/login'), 3000);
@@ -151,45 +143,6 @@ const RegisterPage = () => {
                       </Col>
                     </Row>
                     
-                    <Row>
-                      <Col md={4}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Student ID</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="studentId"
-                            value={form.studentId}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={4}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Date of Birth</Form.Label>
-                          <Form.Control
-                            type="date"
-                            name="dateOfBirth"
-                            value={form.dateOfBirth}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={4}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Program/Degree</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="program"
-                            value={form.program}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                    </Row>
-                    
                     <div className="d-grid mt-4">
                       <Button 
                         variant="primary" 
@@ -258,57 +211,45 @@ const RegisterPage = () => {
                       </Col>
                     </Row>
                     
-                    <Row>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>University ID/Registration Number</Form.Label>
-                          <Form.Control
-                            type="text"
-                            name="universityId"
-                            value={form.universityId}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group className="mb-3">
-                          <Form.Label>Official Website</Form.Label>
-                          <Form.Control
-                            type="url"
-                            name="website"
-                            value={form.website}
-                            onChange={handleChange}
-                            required
-                          />
-                        </Form.Group>
-                      </Col>
-                    </Row>
+                    <Form.Group className="mb-3">
+                      <Form.Label>Description</Form.Label>
+                      <Form.Control
+                        type="text"
+                        name="description"
+                        value={form.description}
+                        onChange={handleChange}
+                        required
+                      />
+                    </Form.Group>
                     
                     <Row>
                       <Col md={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Address</Form.Label>
+                          <Form.Label>Location</Form.Label>
                           <Form.Control
-                            as="textarea"
-                            name="address"
-                            value={form.address}
+                            type="text"
+                            name="location"
+                            value={form.location}
                             onChange={handleChange}
-                            rows={3}
                             required
                           />
                         </Form.Group>
                       </Col>
                       <Col md={6}>
                         <Form.Group className="mb-3">
-                          <Form.Label>Contact Phone</Form.Label>
-                          <Form.Control
-                            type="tel"
-                            name="phoneNumber"
-                            value={form.phoneNumber}
+                          <Form.Label>Country/Region</Form.Label>
+                          <Form.Select
+                            name="country"
+                            value={form.country}
                             onChange={handleChange}
                             required
-                          />
+                          >
+                            <option value="Vietnam">Vietnam</option>
+                            <option value="Bangladesh">Bangladesh</option>
+                            <option value="India">India</option>
+                            <option value="China">China</option>
+                            <option value="Hong Kong">Hong Kong</option>
+                          </Form.Select>
                         </Form.Group>
                       </Col>
                     </Row>

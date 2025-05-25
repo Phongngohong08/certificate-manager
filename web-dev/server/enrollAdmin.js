@@ -29,7 +29,8 @@ async function main() {
     const enrollment = await ca.enroll({ enrollmentID: 'admin', enrollmentSecret: 'adminpw' });
 
     // Kiểm tra loại private key trả về phải là ECDSA
-    if (!enrollment.key || !enrollment.key.type || !enrollment.key.type.includes('EC')) {
+    const privateKeyPem = enrollment.key.toBytes();
+    if (!privateKeyPem.includes('BEGIN EC PRIVATE KEY') && !privateKeyPem.includes('BEGIN PRIVATE KEY')) {
       throw new Error('Private key trả về không phải ECDSA. Hãy chắc chắn Fabric CA cấu hình sinh ECDSA key.');
     }
 

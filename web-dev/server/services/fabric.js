@@ -1,6 +1,7 @@
 const { Gateway, Wallets } = require('fabric-network');
 const path = require('path');
 const fs = require('fs');
+const proofService = require('./proof-service');
 
 const ccpPath = process.env.CCP_PATH;
 const channelName = process.env.FABRIC_CHANNEL_NAME;
@@ -29,6 +30,16 @@ async function getContract(userId) {
 }
 
 async function invokeChaincode(userId, fn, args = []) {
+  // Special handling for custom functions
+  if (fn === 'generateCertificateProof' && args.length > 0) {
+    return await proofService.generateCertificateProof(args[0]);
+  }
+  
+  if (fn === 'verifyCertificateProof' && args.length > 0) {
+    const data = JSON.parse(args[0]);
+    return await proofService.verifyCertificateProof(data.proof, data.disclosedData);
+  }
+  
   const { contract, gateway } = await getContract(userId);
   try {
     const result = await contract.submitTransaction(fn, ...args);
@@ -39,6 +50,24 @@ async function invokeChaincode(userId, fn, args = []) {
 }
 
 async function queryChaincode(userId, fn, args = []) {
+  // Special handling for custom functions
+  if (fn === 'generateCertificateProof' && args.length > 0) {
+    return await proofService.generateCertificateProof(args[0]);
+  }
+  
+  if (fn === 'verifyCertificateProof' && args.length > 0) {
+    try {
+      const data = JSON.parse(args[0]);
+      console.log("Verifying certificate with data:", data);
+      const result = await proofService.verifyCertificateProof(data.proof, data.disclosedData);
+      console.log("Verification result:", result);
+      return result ? 'true' : 'false';
+    } catch (err) {
+      console.error("Error in verifyCertificateProof:", err);
+      throw err;
+    }
+  }
+  
   const { contract, gateway } = await getContract(userId);
   try {
     const result = await contract.evaluateTransaction(fn, ...args);

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const fabric = require('../services/fabric');
+const proofService = require('../services/proof-service');
 
 /**
  * @swagger
@@ -46,15 +47,38 @@ const fabric = require('../services/fabric');
 router.post('/verify', async (req, res) => {
   try {
     const { certUUID, disclosedData, proof } = req.body;
+    
+    if (!certUUID || !disclosedData || !proof) {
+      return res.status(400).json({ 
+        verified: false, 
+        error: 'Missing required parameters: certUUID, disclosedData, and proof are all required' 
+      });
+    }
+
+    // Log request structure for debugging
+    console.log('Verify request:', {
+      certUUID,
+      disclosedData: Object.keys(disclosedData),
+      proof: typeof proof === 'string' ? 'string' : Object.keys(proof)
+    });
+    
     // Gọi chaincode để xác thực proof
     const result = await fabric.queryChaincode(
-      'admin', // hoặc identity phù hợp
+      'admin',
       'verifyCertificateProof',
       [JSON.stringify({ certUUID, disclosedData, proof })]
     );
-    res.json({ verified: result === 'true' });
+    
+    const verified = result === 'true';
+    
+    res.json({ 
+      verified,
+      certUUID,
+      message: verified ? 'Certificate is authentic' : 'Certificate verification failed'
+    });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Verification error:', err);
+    res.status(500).json({ verified: false, error: err.message });
   }
 });
 

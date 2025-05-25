@@ -44,21 +44,33 @@ async function saveToFabricWallet(email, publicKey, privateKey) {
 }
 
 /**
- * Đăng ký user với Fabric CA (giả lập)
+ * Đăng ký user với Fabric CA
  * @param {string} email Email của user
+ * @param {string} role Role của user (university hoặc student)
  * @returns {Object} Object chứa thông tin đăng ký
  */
-async function registerUser(email) {
+async function registerUser(email, role = 'university') {
   try {
-    // Tạo cặp khóa
-    const keys = generateKeyPair();
-    // Lưu vào ví Fabric chuẩn
-    await saveToFabricWallet(email, keys.publicKey, keys.privateKey);
-    // Trong thực tế, cần đăng ký user với Fabric CA để lấy certificate thật
+    // Sử dụng hàm đăng ký user chính thức với Fabric CA
+    const registerAndEnrollUser = require('../registerUser');
+    const result = await registerAndEnrollUser(email, role);
+    
+    if (!result.success) {
+      throw new Error(result.message);
+    }
+    
+    // Lấy public key từ wallet sau khi đăng ký
+    const wallet = await Wallets.newFileSystemWallet(walletDir);
+    const identity = await wallet.get(email);
+    if (!identity) {
+      throw new Error(`Identity for user ${email} not found in wallet after registration`);
+    }
+    
+    // Trả về public key từ certificate
     return {
-      publicKey: keys.publicKey,
+      publicKey: identity.credentials.certificate,
       success: true,
-      message: `User ${email} registered successfully`
+      message: `User ${email} registered successfully with Fabric CA`
     };
   } catch (error) {
     console.error(`Failed to register user ${email}:`, error);

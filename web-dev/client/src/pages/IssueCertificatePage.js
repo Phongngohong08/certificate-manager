@@ -60,7 +60,7 @@ const IssueCertificatePage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/university/certificates/issue`, {
+      const response = await fetch(`${API_URL}/university/issue`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${currentUser?.token}`,

@@ -3,7 +3,7 @@ import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-b
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002/api';
 
 const IssueCertificatePage = () => {
   const { currentUser } = useAuth();
@@ -27,27 +27,33 @@ const IssueCertificatePage = () => {
     // Fetch registered students
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`${API_URL}/university/students`, {
-          credentials: 'include',
+        const response = await fetch(`${API_URL}/student/list`, {
+          headers: {
+            'Authorization': `Bearer ${currentUser?.token}`,
+            'Content-Type': 'application/json',
+          },
         });
         const data = await response.json();
         
         if (response.ok) {
           setStudents(data.students || []);
+        } else {
+          console.error('Error fetching students:', data.error);
         }
       } catch (error) {
         console.error('Error fetching students', error);
       }
     };
 
-    fetchStudents();
-  }, []);
+    if (currentUser?.token) {
+      fetchStudents();
+    }
+  }, [currentUser]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -57,9 +63,9 @@ const IssueCertificatePage = () => {
       const response = await fetch(`${API_URL}/university/certificates/issue`, {
         method: 'POST',
         headers: {
+          'Authorization': `Bearer ${currentUser?.token}`,
           'Content-Type': 'application/json',
         },
-        credentials: 'include',
         body: JSON.stringify(formData),
       });
 

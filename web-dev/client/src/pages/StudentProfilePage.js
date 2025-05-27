@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
 
 const StudentProfilePage = () => {
   const { currentUser, userType } = useAuth();

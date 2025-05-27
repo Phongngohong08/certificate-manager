@@ -6,7 +6,7 @@ import jsPDF from 'jspdf';
 import QRCode from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
 
 const CertificateDetailsPage = () => {
   const { id } = useParams();

@@ -176,6 +176,53 @@ router.get('/dashboard', authenticateJWT, async (req, res) => {
   }
 });
 
+/**
+ * @swagger
+ * /api/student/list:
+ *   get:
+ *     summary: Get all students
+ *     tags: [Students]
+ *     description: Retrieve a list of all registered students (for university use)
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of students retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 students:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       publicKey:
+ *                         type: string
+ *       401:
+ *         description: Unauthorized - No JWT token provided
+ *       403:
+ *         description: Forbidden - Invalid JWT token
+ *       500:
+ *         description: Server error
+ */
+router.get('/list', authenticateJWT, async (req, res) => {
+  try {
+    // Lấy tất cả students, loại bỏ password khỏi response
+    const students = await Student.find({}, { password: 0 });
+    res.json({ students });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Get all certificates for a student
 router.get('/certificates', async (req, res) => {
   try {

@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
 
 const VerifyPage = () => {
   const [searchParams] = useSearchParams();

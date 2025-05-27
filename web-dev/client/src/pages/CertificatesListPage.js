@@ -3,7 +3,7 @@ import { Container, Row, Col, Card, Table, Button, Badge, Form, InputGroup } fro
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_URL = 'http://localhost:5000';
+const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
 
 const CertificatesListPage = () => {
   const { userType } = useAuth();

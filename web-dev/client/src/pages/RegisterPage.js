@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Tabs, Tab } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -21,20 +21,34 @@ const RegisterPage = () => {
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    if (isMountedRef.current) {
+      setForm(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!isMountedRef.current) return;
+    
     setError('');
     setLoading(true);
 
     if (form.password !== form.confirmPassword) {
-      setError('Passwords do not match');
-      setLoading(false);
+      if (isMountedRef.current) {
+        setError('Passwords do not match');
+        setLoading(false);
+      }
       return;
     }
 
@@ -57,12 +71,23 @@ const RegisterPage = () => {
         };
       }
       await register(userData, key);
-      setSuccess(true);
-      setTimeout(() => navigate('/login'), 3000);
+      
+      if (isMountedRef.current) {
+        setSuccess(true);
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            navigate('/login');
+          }
+        }, 3000);
+      }
     } catch (error) {
-      setError(error.message || 'Failed to register');
+      if (isMountedRef.current) {
+        setError(error.message || 'Failed to register');
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

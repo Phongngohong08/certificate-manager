@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Tabs, Tab } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,20 +11,37 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const { login } = useAuth();
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!isMountedRef.current) return;
+    
     setError('');
     setLoading(true);
 
     try {
       const credentials = { email, password };
       await login(credentials, key);
-      navigate(key === 'student' ? '/student/dashboard' : '/university/dashboard');
+      
+      if (isMountedRef.current) {
+        navigate(key === 'student' ? '/student/dashboard' : '/university/dashboard');
+      }
     } catch (error) {
-      setError(error.message || 'Failed to log in. Please check your credentials.');
+      if (isMountedRef.current) {
+        setError(error.message || 'Failed to log in. Please check your credentials.');
+      }
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
   };
 

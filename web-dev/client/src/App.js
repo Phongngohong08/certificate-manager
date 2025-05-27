@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 
 // Style imports
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -28,46 +28,71 @@ import CertificateDetailsPage from './pages/CertificateDetailsPage';
 import StudentProfilePage from './pages/StudentProfilePage';
 import UniversityProfilePage from './pages/UniversityProfilePage';
 
-const App = () => {
-  return (
-    <Router>
+// Layout component
+const Layout = () => (
+  <div className="app-container">
+    <Navigation />
+    <main className="flex-grow-1 py-3">
+      <Outlet />
+    </main>
+    <Footer />
+  </div>
+);
+
+// Router configuration with future flags
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: (
       <AuthProvider>
-        <div className="app-container">
-          <Navigation />
-          <main className="flex-grow-1 py-3">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<HomePage />} />
-              <Route path="/login" element={<LoginPage />} />
-              <Route path="/register" element={<RegisterPage />} />
-              <Route path="/verify" element={<VerifyPage />} />
-              
-              {/* Student Routes */}
-              <Route path="/student" element={<ProtectedRoute userTypeRequired="student" />}>
-                <Route path="dashboard" element={<StudentDashboard />} />
-                <Route path="certificates" element={<CertificatesListPage />} />
-                <Route path="certificates/:id" element={<CertificateDetailsPage />} />
-                <Route path="profile" element={<StudentProfilePage />} />
-              </Route>
-              
-              {/* University Routes */}
-              <Route path="/university" element={<ProtectedRoute userTypeRequired="university" />}>
-                <Route path="dashboard" element={<UniversityDashboard />} />
-                <Route path="certificates" element={<CertificatesListPage />} />
-                <Route path="certificates/:id" element={<CertificateDetailsPage />} />
-                <Route path="issue" element={<IssueCertificatePage />} />
-                <Route path="profile" element={<UniversityProfilePage />} />
-              </Route>
-              
-              {/* Redirect invalid paths to home */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <Layout />
       </AuthProvider>
-    </Router>
-  );
+    ),
+    children: [
+      // Public Routes
+      { index: true, element: <HomePage /> },
+      { path: "login", element: <LoginPage /> },
+      { path: "register", element: <RegisterPage /> },
+      { path: "verify", element: <VerifyPage /> },
+      
+      // Student Routes
+      {
+        path: "student",
+        element: <ProtectedRoute userTypeRequired="student" />,
+        children: [
+          { path: "dashboard", element: <StudentDashboard /> },
+          { path: "certificates", element: <CertificatesListPage /> },
+          { path: "certificates/:id", element: <CertificateDetailsPage /> },
+          { path: "profile", element: <StudentProfilePage /> },
+        ],
+      },
+      
+      // University Routes
+      {
+        path: "university",
+        element: <ProtectedRoute userTypeRequired="university" />,
+        children: [
+          { path: "dashboard", element: <UniversityDashboard /> },
+          { path: "certificates", element: <CertificatesListPage /> },
+          { path: "certificates/:id", element: <CertificateDetailsPage /> },
+          { path: "issue", element: <IssueCertificatePage /> },
+          { path: "profile", element: <UniversityProfilePage /> },
+        ],
+      },
+      
+      // Redirect invalid paths to home
+      { path: "*", element: <Navigate to="/" replace /> },
+    ],
+  },
+], {
+  future: {
+    v7_startTransition: true,
+    v7_relativeSplatPath: true,
+  },
+});
+
+const App = () => {
+  return <RouterProvider router={router} />;
 };
 
 export default App;

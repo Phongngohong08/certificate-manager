@@ -10,18 +10,18 @@ const IssueCertificatePage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
-  const [students, setStudents] = useState([]);
-  const [formData, setFormData] = useState({
-    studentId: '',
-    courseName: '',
-    programName: '',
-    grade: '',
+  const [students, setStudents] = useState([]);  const [formData, setFormData] = useState({
+    studentId: '', // For tracking selected student
+    studentName: '',
+    studentEmail: '',
+    universityName: '',
+    universityEmail: '',
+    major: '',
+    departmentName: '',
+    cgpa: '',
     dateOfIssue: new Date().toISOString().split('T')[0],
-    expirationDate: '',
-    description: '',
-    additionalNotes: ''
+    certificateId: ''
   });
-
   useEffect(() => {
     // Fetch registered students
     const fetchStudents = async () => {
@@ -33,32 +33,87 @@ const IssueCertificatePage = () => {
       }
     };
 
-    fetchStudents();
-  }, []);
+    // Set university information from current user
+    if (currentUser) {
+      setFormData(prev => ({
+        ...prev,
+        universityName: currentUser.name || '',
+        universityEmail: currentUser.email || ''
+      }));
+    }
 
+    fetchStudents();
+  }, [currentUser]);
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  const handleSubmit = async (e) => {
+    
+    // If student is selected, update student info
+    if (name === 'studentId') {
+      const selectedStudent = students.find(student => student._id === value);
+      if (selectedStudent) {
+        setFormData(prev => ({
+          ...prev,
+          studentId: value,
+          studentName: selectedStudent.name,
+          studentEmail: selectedStudent.email
+        }));
+      } else {
+        setFormData(prev => ({
+          ...prev,
+          studentId: value,
+          studentName: '',
+          studentEmail: ''
+        }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+
+    // Auto-generate certificate ID when date or major changes
+    if (name === 'dateOfIssue' || name === 'major') {
+      const date = name === 'dateOfIssue' ? value : formData.dateOfIssue;
+      const major = name === 'major' ? value : formData.major;
+      if (date && major) {
+        const year = new Date(date).getFullYear();
+        const majorCode = major.replace(/\s+/g, '').toUpperCase().substring(0, 4);
+        const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+        const certId = `${majorCode}-${year}-${randomNum}`;
+        setFormData(prev => ({ ...prev, certificateId: certId }));
+      }
+    }
+  };  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      await axiosInstance.post('university/issue', formData);
+      // Prepare data for submission (exclude studentId as it's not part of the schema)
+      const certificateData = {
+        studentName: formData.studentName,
+        studentEmail: formData.studentEmail,
+        universityName: formData.universityName,
+        universityEmail: formData.universityEmail,
+        major: formData.major,
+        departmentName: formData.departmentName,
+        cgpa: formData.cgpa,
+        dateOfIssue: formData.dateOfIssue,
+        certificateId: formData.certificateId
+      };
+
+      await axiosInstance.post('university/issue', certificateData);
       setSuccess(true);
-      
-      // Clear form
+        // Clear form
       setFormData({
-        studentId: '',
-        courseName: '',
-        programName: '',
-        grade: '',
+        studentId: '', // For tracking selected student
+        studentName: '',
+        studentEmail: '',
+        universityName: currentUser?.name || '',
+        universityEmail: currentUser?.email || '',
+        major: '',
+        departmentName: '',
+        cgpa: '',
         dateOfIssue: new Date().toISOString().split('T')[0],
-        expirationDate: '',
-        description: '',
-        additionalNotes: ''
+        certificateId: ''
       });
 
       // Navigate to success page after 2 seconds
@@ -66,7 +121,7 @@ const IssueCertificatePage = () => {
         navigate('/university/certificates');
       }, 2000);
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to issue certificate');
+      setError(error.response?.data?.error || 'Failed to issue certificate');
     } finally {
       setLoading(false);
     }
@@ -80,8 +135,7 @@ const IssueCertificatePage = () => {
           
           {error && <Alert variant="danger">{error}</Alert>}
           {success && <Alert variant="success">Certificate issued successfully!</Alert>}
-          
-          <Form onSubmit={handleSubmit}>
+            <Form onSubmit={handleSubmit}>
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
@@ -95,7 +149,7 @@ const IssueCertificatePage = () => {
                     <option value="">Select a student</option>
                     {students.map((student) => (
                       <option key={student._id} value={student._id}>
-                        {student.name} ({student.studentId})
+                        {student.name} ({student.email})
                       </option>
                     ))}
                   </Form.Select>
@@ -103,12 +157,12 @@ const IssueCertificatePage = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Course/Certificate Name</Form.Label>
+                  <Form.Label>Major/Field of Study</Form.Label>
                   <Form.Control
                     type="text"
-                    name="courseName"
-                    placeholder="e.g. Bachelor of Computer Science"
-                    value={formData.courseName}
+                    name="major"
+                    placeholder="e.g. Computer Science"
+                    value={formData.major}
                     onChange={handleChange}
                     required
                   />
@@ -119,12 +173,12 @@ const IssueCertificatePage = () => {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Program Name</Form.Label>
+                  <Form.Label>Department Name</Form.Label>
                   <Form.Control
                     type="text"
-                    name="programName"
-                    placeholder="e.g. Computer Science"
-                    value={formData.programName}
+                    name="departmentName"
+                    placeholder="e.g. School of Information Technology"
+                    value={formData.departmentName}
                     onChange={handleChange}
                     required
                   />
@@ -132,12 +186,12 @@ const IssueCertificatePage = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Grade/CGPA</Form.Label>
+                  <Form.Label>CGPA</Form.Label>
                   <Form.Control
                     type="text"
-                    name="grade"
-                    placeholder="e.g. A or 3.8/4.0"
-                    value={formData.grade}
+                    name="cgpa"
+                    placeholder="e.g. 3.8 or 3.8/4.0"
+                    value={formData.cgpa}
                     onChange={handleChange}
                     required
                   />
@@ -160,41 +214,74 @@ const IssueCertificatePage = () => {
               </Col>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>Expiration Date (if applicable)</Form.Label>
+                  <Form.Label>Certificate ID</Form.Label>
                   <Form.Control
-                    type="date"
-                    name="expirationDate"
-                    value={formData.expirationDate}
+                    type="text"
+                    name="certificateId"
+                    placeholder="Auto-generated or enter custom ID"
+                    value={formData.certificateId}
                     onChange={handleChange}
+                    required
                   />
                 </Form.Group>
               </Col>
             </Row>
             
-            <Form.Group className="mb-3">
-              <Form.Label>Certificate Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="description"
-                rows={3}
-                placeholder="Enter details about this certificate or program"
-                value={formData.description}
-                onChange={handleChange}
-                required
-              />
-            </Form.Group>
+            <Row>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>University Name</Form.Label>
+                  <Form.Control
+                    type="text"
+                    name="universityName"
+                    value={formData.universityName}
+                    onChange={handleChange}
+                    required
+                    readOnly
+                  />
+                </Form.Group>
+              </Col>
+              <Col md={6}>
+                <Form.Group className="mb-3">
+                  <Form.Label>University Email</Form.Label>
+                  <Form.Control
+                    type="email"
+                    name="universityEmail"
+                    value={formData.universityEmail}
+                    onChange={handleChange}
+                    required
+                    readOnly
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
             
-            <Form.Group className="mb-4">
-              <Form.Label>Additional Notes</Form.Label>
-              <Form.Control
-                as="textarea"
-                name="additionalNotes"
-                rows={2}
-                placeholder="Any additional information to include"
-                value={formData.additionalNotes}
-                onChange={handleChange}
-              />
-            </Form.Group>
+            {formData.studentName && (
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Student Name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={formData.studentName}
+                      readOnly
+                      className="bg-light"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Student Email</Form.Label>
+                    <Form.Control
+                      type="email"
+                      value={formData.studentEmail}
+                      readOnly
+                      className="bg-light"
+                    />
+                  </Form.Group>
+                </Col>
+              </Row>
+            )}
             
             <div className="d-flex justify-content-between mt-4">
               <Button 

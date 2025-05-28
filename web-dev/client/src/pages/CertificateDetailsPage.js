@@ -154,42 +154,52 @@ const CertificateDetailsPage = () => {
               <i className="bi bi-arrow-left me-2"></i>
               Back
             </Button>
-            
-            <div>
+              <div>
               {userType === 'student' && (
-                <div className="d-inline-block me-2">
-                  <Dropdown>
-                    <Dropdown.Toggle variant="success">
-                      <i className="bi bi-share me-1"></i> Share
-                    </Dropdown.Toggle>
-                    <Dropdown.Menu>
-                      <div className="px-3 py-2">
-                        <Form.Group className="mb-2">
-                          <Form.Label>Share for</Form.Label>
-                          <Form.Select
-                            value={shareDuration}
-                            onChange={(e) => setShareDuration(e.target.value)}
-                            size="sm"
+                <>
+                  <Button
+                    variant="info"
+                    className="me-2"
+                    onClick={() => navigate(`/student/certificates/${id}/selective-disclosure`)}
+                  >
+                    <i className="bi bi-shield-check me-1"></i>
+                    Selective Disclosure
+                  </Button>
+                  
+                  <div className="d-inline-block me-2">
+                    <Dropdown>
+                      <Dropdown.Toggle variant="success">
+                        <i className="bi bi-share me-1"></i> Share
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        <div className="px-3 py-2">
+                          <Form.Group className="mb-2">
+                            <Form.Label>Share for</Form.Label>
+                            <Form.Select
+                              value={shareDuration}
+                              onChange={(e) => setShareDuration(e.target.value)}
+                              size="sm"
+                            >
+                              <option value="24h">24 hours</option>
+                              <option value="7d">7 days</option>
+                              <option value="30d">30 days</option>
+                              <option value="permanent">Permanently</option>
+                            </Form.Select>
+                          </Form.Group>
+                          <Button 
+                            variant="success" 
+                            size="sm" 
+                            className="w-100"
+                            onClick={handleShareCertificate}
+                            disabled={sharing}
                           >
-                            <option value="24h">24 hours</option>
-                            <option value="7d">7 days</option>
-                            <option value="30d">30 days</option>
-                            <option value="permanent">Permanently</option>
-                          </Form.Select>
-                        </Form.Group>
-                        <Button 
-                          variant="success" 
-                          size="sm" 
-                          className="w-100"
-                          onClick={handleShareCertificate}
-                          disabled={sharing}
-                        >
-                          {sharing ? 'Generating Link...' : 'Generate Share Link'}
-                        </Button>
-                      </div>
-                    </Dropdown.Menu>
-                  </Dropdown>
-                </div>
+                            {sharing ? 'Generating Link...' : 'Generate Share Link'}
+                          </Button>
+                        </div>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </div>
+                </>
               )}
               
               {userType === 'university' && !certificate.revoked && (

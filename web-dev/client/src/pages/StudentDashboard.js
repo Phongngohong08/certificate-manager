@@ -58,8 +58,7 @@ const StudentDashboard = () => {
               </div>
             </Card.Body>
           </Card>
-        </Col>
-        <Col md={4}>
+        </Col>        <Col md={4}>
           <Card className="h-100 shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center">
@@ -76,8 +75,46 @@ const StudentDashboard = () => {
         </Col>
       </Row>
 
+      {/* Selective Disclosure Feature Card */}
       <Row className="mb-4">
-        <Col>
+        <Col md={12}>
+          <Card className="shadow-sm border-left-primary">
+            <Card.Body>
+              <Row className="align-items-center">
+                <Col md={8}>
+                  <div className="d-flex align-items-center mb-2">
+                    <i className="bi bi-eye-slash fs-3 text-primary me-3"></i>
+                    <h5 className="mb-0">Selective Disclosure</h5>
+                  </div>
+                  <p className="text-muted mb-0">
+                    Share specific parts of your certificates while keeping other information private. 
+                    Generate proofs for employers without revealing your complete academic record.
+                  </p>
+                </Col>
+                <Col md={4} className="text-end">
+                  <Link to="/verify" className="me-2">
+                    <Button variant="outline-primary">
+                      <i className="bi bi-search me-1"></i>
+                      Verify Proofs
+                    </Button>
+                  </Link>
+                  {certificates.length > 0 && (
+                    <Link to={`/student/certificates/${certificates[0]._id}/selective-disclosure`}>
+                      <Button variant="primary">
+                        <i className="bi bi-plus-circle me-1"></i>
+                        Create Proof
+                      </Button>
+                    </Link>
+                  )}
+                </Col>
+              </Row>
+            </Card.Body>
+          </Card>
+        </Col>
+      </Row>
+
+      <Row className="mb-4">
+        <Col md={8}>
           <Card className="shadow-sm">
             <Card.Body>
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -90,12 +127,11 @@ const StudentDashboard = () => {
               {loading ? (
                 <p>Loading certificates...</p>
               ) : certificates.length > 0 ? (
-                <Table hover responsive>
-                  <thead>
+                <Table hover responsive>                  <thead>
                     <tr>
                       <th>Certificate ID</th>
                       <th>University</th>
-                      <th>Course/Degree</th>
+                      <th>Major/Program</th>
                       <th>Issue Date</th>
                       <th>Status</th>
                       <th>Actions</th>
@@ -104,10 +140,10 @@ const StudentDashboard = () => {
                   <tbody>
                     {certificates.slice(0, 5).map((cert) => (
                       <tr key={cert._id}>
-                        <td>{cert._id.substring(0, 8)}...</td>
+                        <td>{cert.certificateId || cert._id.substring(0, 8) + '...'}</td>
                         <td>{cert.universityName}</td>
-                        <td>{cert.courseName}</td>
-                        <td>{new Date(cert.dateOfIssue).toLocaleDateString()}</td>
+                        <td>{cert.major || cert.courseName || 'N/A'}</td>
+                        <td>{new Date(cert.dateOfIssue || cert.createdAt).toLocaleDateString()}</td>
                         <td>
                           <Badge bg={cert.revoked ? 'danger' : 'success'}>
                             {cert.revoked ? 'Revoked' : 'Active'}
@@ -117,7 +153,9 @@ const StudentDashboard = () => {
                           <Link to={`/student/certificates/${cert._id}`} className="me-2">
                             <Button variant="outline-primary" size="sm">View</Button>
                           </Link>
-                          <Button variant="outline-success" size="sm">Share</Button>
+                          <Link to={`/student/certificates/${cert._id}/selective-disclosure`} className="me-2">
+                            <Button variant="outline-info" size="sm">Share</Button>
+                          </Link>
                         </td>
                       </tr>
                     ))}
@@ -134,14 +172,13 @@ const StudentDashboard = () => {
           </Card>
         </Col>
       </Row>
-      
-      <Row>
+        <Row>
         <Col>
           <Card className="shadow-sm">
             <Card.Body>
               <h5 className="mb-4">Quick Actions</h5>
               <Row>
-                <Col md={4} className="mb-3">
+                <Col md={3} className="mb-3">
                   <Link to="/student/certificates" className="text-decoration-none">
                     <div className="quick-action-card border rounded p-3 text-center hover-effect">
                       <i className="bi bi-collection fs-1 text-primary mb-2"></i>
@@ -150,23 +187,40 @@ const StudentDashboard = () => {
                     </div>
                   </Link>
                 </Col>
-                <Col md={4} className="mb-3">
+                <Col md={3} className="mb-3">
+                  <Link to="/verify" className="text-decoration-none">
+                    <div className="quick-action-card border rounded p-3 text-center hover-effect">
+                      <i className="bi bi-shield-check fs-1 text-success mb-2"></i>
+                      <h5>Verify Certificates</h5>
+                      <p className="text-muted">Verify certificates and proofs</p>
+                    </div>
+                  </Link>
+                </Col>
+                <Col md={3} className="mb-3">
                   <Link to="/student/profile" className="text-decoration-none">
                     <div className="quick-action-card border rounded p-3 text-center hover-effect">
-                      <i className="bi bi-person-circle fs-1 text-success mb-2"></i>
+                      <i className="bi bi-person-circle fs-1 text-info mb-2"></i>
                       <h5>My Profile</h5>
                       <p className="text-muted">Update your personal information</p>
                     </div>
                   </Link>
                 </Col>
-                <Col md={4} className="mb-3">
-                  <Link to="/student/share" className="text-decoration-none">
-                    <div className="quick-action-card border rounded p-3 text-center hover-effect">
-                      <i className="bi bi-share fs-1 text-info mb-2"></i>
-                      <h5>Share Credentials</h5>
-                      <p className="text-muted">Create shareable links for employers</p>
+                <Col md={3} className="mb-3">
+                  {certificates.length > 0 ? (
+                    <Link to={`/student/certificates/${certificates[0]._id}/selective-disclosure`} className="text-decoration-none">
+                      <div className="quick-action-card border rounded p-3 text-center hover-effect">
+                        <i className="bi bi-eye-slash fs-1 text-warning mb-2"></i>
+                        <h5>Selective Disclosure</h5>
+                        <p className="text-muted">Create privacy-preserving proofs</p>
+                      </div>
+                    </Link>
+                  ) : (
+                    <div className="quick-action-card border rounded p-3 text-center bg-light">
+                      <i className="bi bi-eye-slash fs-1 text-muted mb-2"></i>
+                      <h5 className="text-muted">Selective Disclosure</h5>
+                      <p className="text-muted">Available after certificate issuance</p>
                     </div>
-                  </Link>
+                  )}
                 </Col>
               </Row>
             </Card.Body>

@@ -27,6 +27,7 @@ import CertificatesListPage from './pages/CertificatesListPage';
 import CertificateDetailsPage from './pages/CertificateDetailsPage';
 import StudentProfilePage from './pages/StudentProfilePage';
 import UniversityProfilePage from './pages/UniversityProfilePage';
+import SelectiveDisclosurePage from './pages/SelectiveDisclosurePage';
 
 // Layout component
 const Layout = () => (
@@ -63,6 +64,7 @@ const router = createBrowserRouter([
           { path: "dashboard", element: <StudentDashboard /> },
           { path: "certificates", element: <CertificatesListPage /> },
           { path: "certificates/:id", element: <CertificateDetailsPage /> },
+          { path: "certificates/:id/selective-disclosure", element: <SelectiveDisclosurePage /> },
           { path: "profile", element: <StudentProfilePage /> },
         ],
       },

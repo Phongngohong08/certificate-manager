@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance from '../config/axios';
 
 const StudentDashboard = () => {
   const { currentUser } = useAuth();
@@ -13,14 +12,8 @@ const StudentDashboard = () => {
   useEffect(() => {
     const fetchStudentCertificates = async () => {
       try {
-        const response = await fetch(`${API_URL}/student/certificates`, {
-          credentials: 'include',
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-          setCertificates(data.certificates || []);
-        }
+        const { data } = await axiosInstance.get('student/certificates');
+        setCertificates(data.certificates || []);
       } catch (error) {
         console.error('Error fetching student certificates', error);
       } finally {

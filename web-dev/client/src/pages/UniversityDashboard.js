@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Table, Badge } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance from '../config/axios';
 
 const UniversityDashboard = () => {
   const { currentUser } = useAuth();
@@ -18,12 +17,9 @@ const UniversityDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await fetch(`${API_URL}/university/dashboard`, {
-          credentials: 'include',
-        });
-        const data = await response.json();
+        const { data } = await axiosInstance.get('university/dashboard');
         
-        if (response.ok) {
+        if (data) {
           setStats({
             totalCertificates: data.stats.totalCertificates || 0,
             certificatesThisMonth: data.stats.certificatesThisMonth || 0,

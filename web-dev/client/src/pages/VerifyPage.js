@@ -1,8 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useSearchParams } from 'react-router-dom';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance from '../config/axios';
 
 const VerifyPage = () => {
   const [searchParams] = useSearchParams();
@@ -22,22 +21,21 @@ const VerifyPage = () => {
     setError('QR code scanning from image upload is temporarily disabled due to compatibility issues. Please enter the certificate ID manually.');
   };
 
-  const handleVerify = async (id = certificateId) => {
+  const handleVerify = async () => {
+    if (!certificateId.trim()) {
+      setError('Please enter a certificate ID');
+      return;
+    }
+
+    setLoading(true);
     setError('');
     setVerificationResult(null);
-    setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/verify/${id}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Verification failed');
-      }
-
+      const { data } = await axiosInstance.get(`verify/verify?id=${certificateId}`);
       setVerificationResult(data);
     } catch (error) {
-      setError(error.message || 'An error occurred during verification');
+      setError(error.response?.data?.message || 'Failed to verify certificate');
     } finally {
       setLoading(false);
     }

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Form, Button, Card, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = 'http://localhost:3002/api';
+import axiosInstance from '../config/axios';
 
 const IssueCertificatePage = () => {
   const { currentUser } = useAuth();
@@ -27,28 +26,15 @@ const IssueCertificatePage = () => {
     // Fetch registered students
     const fetchStudents = async () => {
       try {
-        const response = await fetch(`${API_URL}/student/list`, {
-          headers: {
-            'Authorization': `Bearer ${currentUser?.token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-          setStudents(data.students || []);
-        } else {
-          console.error('Error fetching students:', data.error);
-        }
+        const { data } = await axiosInstance.get('student/list');
+        setStudents(data.students || []);
       } catch (error) {
-        console.error('Error fetching students', error);
+        console.error('Error fetching students:', error);
       }
     };
 
-    if (currentUser?.token) {
-      fetchStudents();
-    }
-  }, [currentUser]);
+    fetchStudents();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -60,21 +46,7 @@ const IssueCertificatePage = () => {
     setError('');
 
     try {
-      const response = await fetch(`${API_URL}/university/issue`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${currentUser?.token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to issue certificate');
-      }
-
+      await axiosInstance.post('university/issue', formData);
       setSuccess(true);
       
       // Clear form
@@ -91,10 +63,10 @@ const IssueCertificatePage = () => {
 
       // Navigate to success page after 2 seconds
       setTimeout(() => {
-        navigate(`/university/certificates/${data.certificateId}`);
+        navigate('/university/certificates');
       }, 2000);
     } catch (error) {
-      setError(error.message || 'An error occurred while issuing certificate');
+      setError(error.response?.data?.message || 'Failed to issue certificate');
     } finally {
       setLoading(false);
     }

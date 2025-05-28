@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance, { API_URL } from '../config/axios';
 
 const StudentProfilePage = () => {
   const { currentUser, userType } = useAuth();
@@ -28,15 +27,7 @@ const StudentProfilePage = () => {
   useEffect(() => {
     const fetchStudentProfile = async () => {
       try {
-        const response = await fetch(`${API_URL}/student/profile`, {
-          credentials: 'include',
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch profile');
-        }
+        const { data } = await axiosInstance.get('student/profile');
         
         const { student } = data;
         setForm({
@@ -54,10 +45,10 @@ const StudentProfilePage = () => {
         });
         
         if (student.profilePicture) {
-          setProfilePictureUrl(`${API_URL}${student.profilePicture}`);
+          setProfilePictureUrl(`${API_URL}/api/${student.profilePicture}`);
         }
       } catch (error) {
-        setError(error.message || 'Failed to load profile');
+        setError(error.response?.data?.message || 'Failed to load profile');
       } finally {
         setLoading(false);
       }
@@ -85,7 +76,6 @@ const StudentProfilePage = () => {
     setUpdating(true);
 
     try {
-      // Create form data for file upload
       const formData = new FormData();
       Object.keys(form).forEach(key => {
         if (key === 'profilePicture') {
@@ -97,17 +87,11 @@ const StudentProfilePage = () => {
         }
       });
 
-      const response = await fetch(`${API_URL}/student/profile`, {
-        method: 'PUT',
-        credentials: 'include',
-        body: formData,
+      const { data } = await axiosInstance.put('student/profile', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        }
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update profile');
-      }
 
       setSuccess('Profile updated successfully');
       
@@ -119,7 +103,7 @@ const StudentProfilePage = () => {
         confirmPassword: '',
       });
     } catch (error) {
-      setError(error.message || 'An error occurred while updating profile');
+      setError(error.response?.data?.message || 'An error occurred while updating profile');
     } finally {
       setUpdating(false);
     }
@@ -144,25 +128,12 @@ const StudentProfilePage = () => {
     setUpdating(true);
 
     try {
-      const response = await fetch(`${API_URL}/student/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          currentPassword: form.currentPassword,
-          newPassword: form.newPassword,
-        }),
+      const { data } = await axiosInstance.post('student/change-password', {
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to change password');
-      }
-
-      setSuccess('Password changed successfully');
+      setSuccess('Password updated successfully');
       
       // Reset password fields
       setForm({
@@ -172,7 +143,7 @@ const StudentProfilePage = () => {
         confirmPassword: '',
       });
     } catch (error) {
-      setError(error.message || 'An error occurred while changing password');
+      setError(error.response?.data?.message || 'Failed to update password');
     } finally {
       setUpdating(false);
     }

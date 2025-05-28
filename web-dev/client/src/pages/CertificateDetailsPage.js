@@ -5,8 +5,7 @@ import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode.react';
 import { useAuth } from '../contexts/AuthContext';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance, { API_URL } from '../config/axios';
 
 const CertificateDetailsPage = () => {
   const { id } = useParams();
@@ -25,19 +24,10 @@ const CertificateDetailsPage = () => {
           ? `university/certificates/${id}` 
           : `student/certificates/${id}`;
           
-        const response = await fetch(`${API_URL}/${endpoint}`, {
-          credentials: 'include',
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to fetch certificate');
-        }
-        
+        const { data } = await axiosInstance.get(endpoint);
         setCertificate(data.certificate);
       } catch (error) {
-        setError(error.message || 'An error occurred');
+        setError(error.response?.data?.message || 'An error occurred');
       } finally {
         setLoading(false);
       }
@@ -51,26 +41,15 @@ const CertificateDetailsPage = () => {
   const handleShareCertificate = async () => {
     try {
       setSharing(true);
-      const response = await fetch(`${API_URL}/student/certificates/${id}/share`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ duration: shareDuration }),
+      const { data } = await axiosInstance.post(`student/certificates/${id}/share`, {
+        duration: shareDuration
       });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to share certificate');
-      }
       
       // Copy link to clipboard
       navigator.clipboard.writeText(data.shareLink);
       alert('Share link copied to clipboard!');
     } catch (error) {
-      setError(error.message || 'Failed to share certificate');
+      setError(error.response?.data?.message || 'Failed to share certificate');
     } finally {
       setSharing(false);
     }
@@ -80,21 +59,12 @@ const CertificateDetailsPage = () => {
     if (window.confirm('Are you sure you want to revoke this certificate? This action cannot be undone.')) {
       try {
         setLoading(true);
-        const response = await fetch(`${API_URL}/university/certificates/${id}/revoke`, {
-          method: 'POST',
-          credentials: 'include',
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.message || 'Failed to revoke certificate');
-        }
+        const { data } = await axiosInstance.post(`university/certificates/${id}/revoke`);
         
         // Refresh certificate data
         setCertificate({ ...certificate, revoked: true });
       } catch (error) {
-        setError(error.message || 'Failed to revoke certificate');
+        setError(error.response?.data?.message || 'Failed to revoke certificate');
       } finally {
         setLoading(false);
       }

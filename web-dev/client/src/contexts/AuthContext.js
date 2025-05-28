@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+import axiosInstance from '../config/axios';
 
 const AuthContext = createContext(null);
 
@@ -44,20 +43,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials, type) => {
     try {
       setLoading(true);
-      const url = `${API_URL}/${type}/login`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(credentials),
-      });
-      
-      const data = await response.json();
-      console.log('response đây', data);
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
+      const { data } = await axiosInstance.post(`${type}/login`, credentials);
       
       // Handle response data structure based on your API response
       let user;
@@ -90,19 +76,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData, type) => {
     try {
       setLoading(true);
-      const url = `${API_URL}/${type}/register`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-      
+      const { data } = await axiosInstance.post(`${type}/register`, userData);
       return data;
     } catch (error) {
       console.error('Registration error:', error);
@@ -114,11 +88,7 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       if (userType) {
-        const url = `${API_URL}/${userType}/logout`;
-        await fetch(url, {
-          method: 'POST',
-          credentials: 'include',
-        });
+        await axiosInstance.post(`${userType}/logout`);
       }
       
       // Clear user data

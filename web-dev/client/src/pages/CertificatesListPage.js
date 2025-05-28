@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Table, Button, Badge, Form, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import axiosInstance from '../config/axios';
 
-const API_URL = 'http://localhost:3002/api'; // Adjust the API URL as needed
+const API_URL = 'http://localhost:3002';
 
 const CertificatesListPage = () => {
   const { userType } = useAuth();
@@ -17,14 +18,8 @@ const CertificatesListPage = () => {
     const fetchCertificates = async () => {
       try {
         const endpoint = userType === 'university' ? 'university/certificates' : 'student/certificates';
-        const response = await fetch(`${API_URL}/${endpoint}`, {
-          credentials: 'include',
-        });
-        const data = await response.json();
-        
-        if (response.ok) {
-          setCertificates(data.certificates || []);
-        }
+        const { data } = await axiosInstance.get(endpoint);
+        setCertificates(data.certificates || []);
       } catch (error) {
         console.error('Error fetching certificates', error);
       } finally {

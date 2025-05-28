@@ -166,8 +166,15 @@ const SelectiveDisclosurePage = () => {
                     <i className="bi bi-check-square me-2"></i>
                     Select Attributes to Share
                   </h5>
-                </Card.Header>
-                <Card.Body>
+                </Card.Header>                <Card.Body>
+                  <Alert variant="info" className="mb-3">
+                    <h6><i className="bi bi-info-circle me-1"></i> About Selective Disclosure:</h6>
+                    <p className="mb-0">
+                      This feature allows you to share specific parts of your certificate while keeping other information private. 
+                      The generated proof cryptographically validates the selected attributes without revealing the complete certificate.
+                    </p>
+                  </Alert>
+                  
                   <p className="text-muted small mb-3">
                     Select which information you want to share. Only the selected attributes will be disclosed to verifiers.
                   </p>

@@ -52,8 +52,17 @@ const ProofVerificationComponent = () => {
           <i className="bi bi-shield-check me-2"></i>
           Proof Verification
         </h5>
-      </Card.Header>
-      <Card.Body>
+      </Card.Header>      <Card.Body>
+        <Alert variant="info" className="mb-4">
+          <h6><i className="bi bi-info-circle me-1"></i> How to use this feature:</h6>
+          <ol className="mb-0">
+            <li>Go to your certificate details page and click "Selective Disclosure"</li>
+            <li>Select the attributes you want to share and click "Generate Proof"</li>
+            <li>Copy the generated proof JSON</li>
+            <li>Paste it in the text area below and click "Verify Proof"</li>
+          </ol>
+        </Alert>
+        
         <p className="text-muted small mb-3">
           Paste the proof data (JSON format) from selective disclosure to verify its authenticity.
         </p>

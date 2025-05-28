@@ -53,16 +53,14 @@ const VerifyPage = () => {
                 <p className="text-muted">
                   Verify the authenticity of academic certificates issued on our blockchain platform
                 </p>
-              </div>
-
-              <Nav variant="tabs" className="mb-4">
+              </div>              <Nav variant="tabs" className="mb-4">
                 <Nav.Item>
                   <Nav.Link 
                     active={activeTab === 'certificate'} 
                     onClick={() => setActiveTab('certificate')}
                   >
                     <i className="bi bi-card-text me-1"></i>
-                    Certificate ID
+                    Simple Certificate ID Verification
                   </Nav.Link>
                 </Nav.Item>
                 <Nav.Item>
@@ -71,17 +69,20 @@ const VerifyPage = () => {
                     onClick={() => setActiveTab('proof')}
                   >
                     <i className="bi bi-shield-check me-1"></i>
-                    Selective Disclosure Proof
+                    Selective Disclosure Proof Verification
                   </Nav.Link>
                 </Nav.Item>
-              </Nav>              {error && (
+              </Nav>{error && (
                 <Alert variant="danger" className="mb-4">
                   {error}
                 </Alert>
-              )}
-
-              {activeTab === 'certificate' && (
+              )}              {activeTab === 'certificate' && (
                 <>
+                  <Alert variant="info" className="mb-4">
+                    <i className="bi bi-info-circle me-2"></i>
+                    <strong>Simple Verification:</strong> Enter a certificate ID to check if it exists and is valid in our database.
+                  </Alert>
+                  
                   {!verificationResult && (
                     <Form onSubmit={(e) => { e.preventDefault(); handleVerify(); }}>
                       <Form.Group className="mb-4">
@@ -201,10 +202,16 @@ const VerifyPage = () => {
                     </div>
                   )}
                 </>
-              )}
-
-              {activeTab === 'proof' && (
-                <ProofVerificationComponent />
+              )}              {activeTab === 'proof' && (
+                <>
+                  <Alert variant="warning" className="mb-4">
+                    <i className="bi bi-exclamation-triangle me-2"></i>
+                    <strong>Selective Disclosure Verification:</strong> This verifies cryptographic proofs generated from the "Create Selective Disclosure" feature. 
+                    You must first generate a proof using the selective disclosure page, then paste it here for verification.
+                  </Alert>
+                  
+                  <ProofVerificationComponent />
+                </>
               )}
             </Card.Body>
           </Card>

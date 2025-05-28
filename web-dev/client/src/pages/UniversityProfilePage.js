@@ -43,9 +43,8 @@ const UniversityProfilePage = () => {
           newPassword: '',
           confirmPassword: '',
         });
-        
-        if (university.logo) {
-          setLogoUrl(`${API_URL}/api/${university.logo}`);
+          if (university.logo) {
+          setLogoUrl(`${API_URL}/${university.logo}`);
         }
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load profile');

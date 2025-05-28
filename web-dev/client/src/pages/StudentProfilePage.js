@@ -43,9 +43,8 @@ const StudentProfilePage = () => {
           newPassword: '',
           confirmPassword: '',
         });
-        
-        if (student.profilePicture) {
-          setProfilePictureUrl(`${API_URL}/api/${student.profilePicture}`);
+          if (student.profilePicture) {
+          setProfilePictureUrl(`${API_URL}/${student.profilePicture}`);
         }
       } catch (error) {
         setError(error.response?.data?.message || 'Failed to load profile');

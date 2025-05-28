@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const fabric = require('../services/fabric');
 const proofService = require('../services/proof-service');
+const Certificate = require('../models/certificate');
 
 /**
  * @swagger
@@ -79,6 +80,91 @@ router.post('/verify', async (req, res) => {
   } catch (err) {
     console.error('Verification error:', err);
     res.status(500).json({ verified: false, error: err.message });
+  }
+});
+
+/**
+ * @swagger
+ * /api/verify/verify:
+ *   get:
+ *     summary: Verify certificate by ID
+ *     tags: [Verification]
+ *     description: Verifies a certificate by its ID and returns certificate details if valid
+ *     parameters:
+ *       - in: query
+ *         name: id
+ *         required: true
+ *         description: Certificate ID to verify
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Verification result with certificate details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 valid:
+ *                   type: boolean
+ *                   description: Whether the certificate is valid
+ *                 certificate:
+ *                   type: object
+ *                   description: Certificate details if valid
+ *                 message:
+ *                   type: string
+ *                   description: Status message
+ *       400:
+ *         description: Missing certificate ID
+ *       404:
+ *         description: Certificate not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/verify', async (req, res) => {
+  try {
+    const { id } = req.query;
+    
+    if (!id) {
+      return res.status(400).json({ 
+        valid: false, 
+        error: 'Certificate ID is required' 
+      });
+    }
+
+    // Find certificate in database
+    const certificate = await Certificate.findById(id);
+    
+    if (!certificate) {
+      return res.status(404).json({ 
+        valid: false, 
+        error: 'Certificate not found' 
+      });
+    }
+
+    // Check if certificate is revoked
+    if (certificate.revoked) {
+      return res.json({ 
+        valid: false,
+        certificate: certificate,
+        message: 'Certificate has been revoked'
+      });
+    }
+
+    // For simple verification, we'll return the certificate as valid
+    // In a full implementation, you might want to verify against blockchain
+    res.json({ 
+      valid: true,
+      certificate: certificate,
+      message: 'Certificate is valid and authentic'
+    });
+    
+  } catch (err) {
+    console.error('Verification error:', err);
+    res.status(500).json({ 
+      valid: false, 
+      error: err.message 
+    });
   }
 });
 

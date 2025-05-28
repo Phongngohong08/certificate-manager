@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Table, Button, Badge, Form, InputGroup } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import axiosInstance from '../config/axios';
-
-const API_URL = 'http://localhost:3002';
+import axiosInstance, { API_URL } from '../config/axios';
 
 const CertificatesListPage = () => {
   const { userType } = useAuth();

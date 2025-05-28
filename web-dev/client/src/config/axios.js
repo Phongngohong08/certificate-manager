@@ -5,7 +5,7 @@ export const API_URL = 'http://localhost:3002';
 
 // Create axios instance with default config
 const axiosInstance = axios.create({
-  baseURL: API_URL,
+  baseURL: `${API_URL}/api`,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',

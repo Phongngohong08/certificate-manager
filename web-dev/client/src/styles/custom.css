@@ -249,6 +249,59 @@ main {
   overflow: hidden;
 }
 
+/* Success Animation */
+.alert-success {
+  border-left: 5px solid #28a745;
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+.alert-success .alert-heading {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+@keyframes slideInFromTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Loading Button Animation */
+.spinner-border-sm {
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Button Improvements */
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-weight: 500;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+}
+
+/* Card Shadow Enhancement */
+.shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card:hover {
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+  transition: box-shadow 0.3s ease;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .certificate-title {

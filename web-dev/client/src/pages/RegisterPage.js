@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, Form, Button, Card, Alert, Tabs, Tab } from 'react-bootstrap';
+import { Container, Row, Col, Form, Button, Card, Alert, Tabs, Tab, Toast, ToastContainer } from 'react-bootstrap';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -15,10 +15,10 @@ const RegisterPage = () => {
     description: '',
     location: '',
     country: 'Vietnam',
-  });
-  const [loading, setLoading] = useState(false);
+  });  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const navigate = useNavigate();
   const { register } = useAuth();
   const isMountedRef = useRef(true);
@@ -42,11 +42,9 @@ const RegisterPage = () => {
     if (!isMountedRef.current) return;
     
     setError('');
-    setLoading(true);
-
-    if (form.password !== form.confirmPassword) {
+    setLoading(true);    if (form.password !== form.confirmPassword) {
       if (isMountedRef.current) {
-        setError('Passwords do not match');
+        setError('Mật khẩu xác nhận không khớp');
         setLoading(false);
       }
       return;
@@ -69,20 +67,19 @@ const RegisterPage = () => {
           location: form.location,
           country: form.country
         };
-      }
-      await register(userData, key);
-      
-      if (isMountedRef.current) {
+      }      await register(userData, key);
+        if (isMountedRef.current) {
         setSuccess(true);
+        setShowToast(true);
+        // Hiển thị thông báo trong 5 giây thay vì 3 giây để người dùng có thể đọc
         setTimeout(() => {
           if (isMountedRef.current) {
             navigate('/login');
           }
-        }, 3000);
-      }
-    } catch (error) {
+        }, 5000);
+      }} catch (error) {
       if (isMountedRef.current) {
-        setError(error.message || 'Failed to register');
+        setError(error.message || 'Đăng ký thất bại. Vui lòng thử lại.');
       }
     } finally {
       if (isMountedRef.current) {
@@ -97,12 +94,18 @@ const RegisterPage = () => {
         <Col md={8}>
           <Card className="shadow">
             <Card.Body className="p-4">
-              <h2 className="text-center mb-4">Register</h2>
-              
-              {error && <Alert variant="danger">{error}</Alert>}
+              <h2 className="text-center mb-4">Đăng ký</h2>
+                {error && <Alert variant="danger">{error}</Alert>}
               {success && (
                 <Alert variant="success">
-                  Registration successful! You will be redirected to login page.
+                  <Alert.Heading>🎉 Đăng ký thành công!</Alert.Heading>
+                  <p>
+                    Tài khoản của bạn đã được tạo thành công. Bạn sẽ được chuyển hướng đến trang đăng nhập trong vài giây.
+                  </p>
+                  <hr />
+                  <p className="mb-0">
+                    <strong>Chú ý:</strong> Vui lòng sử dụng email và mật khẩu vừa đăng ký để đăng nhập.
+                  </p>
                 </Alert>
               )}
               
@@ -167,14 +170,26 @@ const RegisterPage = () => {
                         </Form.Group>
                       </Col>
                     </Row>
-                    
-                    <div className="d-grid mt-4">
+                      <div className="d-grid mt-4">
                       <Button 
                         variant="primary" 
                         type="submit" 
                         disabled={loading || success}
+                        size="lg"
                       >
-                        {loading ? 'Registering...' : 'Register as Student'}
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Đang đăng ký...
+                          </>
+                        ) : success ? (
+                          <>
+                            <i className="bi bi-check-circle me-2"></i>
+                            Đăng ký thành công!
+                          </>
+                        ) : (
+                          'Đăng ký Student'
+                        )}
                       </Button>
                     </div>
                   </Form>
@@ -278,30 +293,61 @@ const RegisterPage = () => {
                         </Form.Group>
                       </Col>
                     </Row>
-                    
-                    <div className="d-grid mt-4">
+                      <div className="d-grid mt-4">
                       <Button 
                         variant="primary" 
                         type="submit" 
                         disabled={loading || success}
+                        size="lg"
                       >
-                        {loading ? 'Registering...' : 'Register as University'}
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Đang đăng ký...
+                          </>
+                        ) : success ? (
+                          <>
+                            <i className="bi bi-check-circle me-2"></i>
+                            Đăng ký thành công!
+                          </>
+                        ) : (
+                          'Đăng ký University'
+                        )}
                       </Button>
                     </div>
                   </Form>
                 </Tab>
               </Tabs>
-              
-              <div className="text-center mt-4">
+                <div className="text-center mt-4">
                 <p>
-                  Already have an account?{' '}
-                  <Link to="/login">Login here</Link>
+                  Đã có tài khoản?{' '}
+                  <Link to="/login">Đăng nhập tại đây</Link>
                 </p>
               </div>
-            </Card.Body>
-          </Card>
+            </Card.Body>          </Card>
         </Col>
       </Row>
+      
+      {/* Toast Notification */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast 
+          show={showToast} 
+          onClose={() => setShowToast(false)} 
+          delay={5000} 
+          autohide
+          bg="success"
+          className="text-white"
+        >
+          <Toast.Header>
+            <i className="bi bi-check-circle-fill me-2 text-success"></i>
+            <strong className="me-auto">Thành công!</strong>
+          </Toast.Header>
+          <Toast.Body>
+            <strong>Đăng ký thành công!</strong><br />
+            Bạn sẽ được chuyển hướng đến trang đăng nhập.
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 };

@@ -163,14 +163,22 @@ router.post('/login', async (req, res) => {
  */
 router.get('/dashboard', authenticateJWT, async (req, res) => {
   try {
-    // Lấy dữ liệu từ blockchain (giả lập)
-    // TODO: Thay thế bằng gọi chaincode thực tế
-    const ledgerData = [];
-    // Lấy dữ liệu từ MongoDB
-    const dbData = await Certificate.find();
-    // Gộp dữ liệu
-    const merged = require('../services/certificate-service').mergeCertificateData(dbData, ledgerData);
-    res.json({ dashboard: merged });
+    const studentEmail = req.user.email;
+    
+    // Get certificates for this student
+    const certificates = await Certificate.find({ studentEmail: studentEmail });
+    
+    // Calculate stats
+    const stats = {
+      totalCertificates: certificates.length,
+      activeVerifications: certificates.filter(cert => !cert.revoked).length,
+      profileViews: 0 // Placeholder for now
+    };
+    
+    res.json({ 
+      stats: stats,
+      certificates: certificates
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -224,11 +232,34 @@ router.get('/list', authenticateJWT, async (req, res) => {
 });
 
 // Get all certificates for a student
-router.get('/certificates', async (req, res) => {
+router.get('/certificates', authenticateJWT, async (req, res) => {
   try {
-    const { email } = req.query;
-    const certs = await Certificate.find({ studentEmail: email });
+    // Get email from JWT token
+    const studentEmail = req.user.email;
+    const certs = await Certificate.find({ studentEmail: studentEmail });
     res.json({ certificates: certs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get a specific certificate by ID for a student
+router.get('/certificates/:id', authenticateJWT, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const studentEmail = req.user.email;
+    
+    // Find certificate by ID and ensure it belongs to this student
+    const certificate = await Certificate.findOne({ 
+      _id: id, 
+      studentEmail: studentEmail 
+    });
+    
+    if (!certificate) {
+      return res.status(404).json({ error: 'Certificate not found or access denied' });
+    }
+    
+    res.json({ certificate });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

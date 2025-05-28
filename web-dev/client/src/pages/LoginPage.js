@@ -36,7 +36,7 @@ const LoginPage = () => {
       }
     } catch (error) {
       if (isMountedRef.current) {
-        setError(error.message || 'Failed to log in. Please check your credentials.');
+        setError(error.message || 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin đăng nhập.');
       }
     } finally {
       if (isMountedRef.current) {
@@ -51,7 +51,7 @@ const LoginPage = () => {
         <Col md={6}>
           <Card className="shadow">
             <Card.Body className="p-4">
-              <h2 className="text-center mb-4">Login</h2>
+              <h2 className="text-center mb-4">Đăng nhập</h2>
               
               {error && <Alert variant="danger">{error}</Alert>}
               
@@ -88,8 +88,16 @@ const LoginPage = () => {
                         variant="primary" 
                         type="submit" 
                         disabled={loading}
+                        size="lg"
                       >
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Đang đăng nhập...
+                          </>
+                        ) : (
+                          'Đăng nhập Student'
+                        )}
                       </Button>
                     </div>
                   </Form>
@@ -122,8 +130,16 @@ const LoginPage = () => {
                         variant="primary" 
                         type="submit" 
                         disabled={loading}
+                        size="lg"
                       >
-                        {loading ? 'Logging in...' : 'Login'}
+                        {loading ? (
+                          <>
+                            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Đang đăng nhập...
+                          </>
+                        ) : (
+                          'Đăng nhập University'
+                        )}
                       </Button>
                     </div>
                   </Form>
@@ -132,10 +148,9 @@ const LoginPage = () => {
               
               <div className="text-center mt-4">
                 <p>
-                  Don't have an account?{' '}
-                  <Link to="/register">Register here</Link>
+                  Chưa có tài khoản?{' '}
+                  <Link to="/register">Đăng ký tại đây</Link>
                 </p>
-                <Link to="/forgot-password">Forgot Password?</Link>
               </div>
             </Card.Body>
           </Card>

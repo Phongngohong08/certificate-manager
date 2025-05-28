@@ -230,11 +230,34 @@ router.post('/issue', async (req, res) => {
 });
 
 // Get all certificates for a university
-router.get('/certificates', async (req, res) => {
+router.get('/certificates', authenticateJWT, async (req, res) => {
   try {
-    const { email } = req.query;
-    const certs = await Certificate.find({ universityEmail: email });
+    // Get email from JWT token
+    const universityEmail = req.user.email;
+    const certs = await Certificate.find({ universityEmail: universityEmail });
     res.json({ certificates: certs });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get a specific certificate by ID for a university
+router.get('/certificates/:id', authenticateJWT, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const universityEmail = req.user.email;
+    
+    // Find certificate by ID and ensure it was issued by this university
+    const certificate = await Certificate.findOne({ 
+      _id: id, 
+      universityEmail: universityEmail 
+    });
+    
+    if (!certificate) {
+      return res.status(404).json({ error: 'Certificate not found or access denied' });
+    }
+    
+    res.json({ certificate });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -270,14 +293,36 @@ router.get('/certificates', async (req, res) => {
  */
 router.get('/dashboard', authenticateJWT, async (req, res) => {
   try {
-    // Lấy dữ liệu từ blockchain (giả lập)
-    // TODO: Thay thế bằng gọi chaincode thực tế
-    const ledgerData = [];
-    // Lấy dữ liệu từ MongoDB
-    const dbData = await Certificate.find();
-    // Gộp dữ liệu
-    const merged = require('../services/certificate-service').mergeCertificateData(dbData, ledgerData);
-    res.json({ dashboard: merged });
+    const universityEmail = req.user.email;
+    
+    // Get certificates for this university
+    const allCerts = await Certificate.find({ universityEmail: universityEmail });
+    
+    // Calculate stats
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    const certificatesThisMonth = allCerts.filter(cert => {
+      const certDate = new Date(cert.dateOfIssue || cert.createdAt);
+      return certDate.getMonth() === currentMonth && certDate.getFullYear() === currentYear;
+    }).length;
+    
+    const stats = {
+      totalCertificates: allCerts.length,
+      certificatesThisMonth: certificatesThisMonth,
+      pendingVerifications: 0 // Placeholder for now
+    };
+    
+    // Get recent certificates (last 5)
+    const recentCertificates = allCerts
+      .sort((a, b) => new Date(b.dateOfIssue || b.createdAt) - new Date(a.dateOfIssue || a.createdAt))
+      .slice(0, 5);
+    
+    res.json({ 
+      stats: stats,
+      recentCertificates: recentCertificates
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

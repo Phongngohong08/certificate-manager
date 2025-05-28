@@ -126,12 +126,13 @@ const StudentDashboard = () => {
               
               {loading ? (
                 <p>Loading certificates...</p>
-              ) : certificates.length > 0 ? (
-                <Table hover responsive>                  <thead>
+              ) : certificates.length > 0 ? (                <Table hover responsive>                  <thead>
                     <tr>
                       <th>Certificate ID</th>
+                      <th>Student</th>
                       <th>University</th>
-                      <th>Major/Program</th>
+                      <th>Major/Department</th>
+                      <th>CGPA</th>
                       <th>Issue Date</th>
                       <th>Status</th>
                       <th>Actions</th>
@@ -141,8 +142,10 @@ const StudentDashboard = () => {
                     {certificates.slice(0, 5).map((cert) => (
                       <tr key={cert._id}>
                         <td>{cert.certificateId || cert._id.substring(0, 8) + '...'}</td>
-                        <td>{cert.universityName}</td>
-                        <td>{cert.major || cert.courseName || 'N/A'}</td>
+                        <td>{cert.studentName || 'N/A'}</td>
+                        <td>{cert.universityName || 'N/A'}</td>
+                        <td>{cert.major || cert.departmentName || 'N/A'}</td>
+                        <td>{cert.cgpa || 'N/A'}</td>
                         <td>{new Date(cert.dateOfIssue || cert.createdAt).toLocaleDateString()}</td>
                         <td>
                           <Badge bg={cert.revoked ? 'danger' : 'success'}>

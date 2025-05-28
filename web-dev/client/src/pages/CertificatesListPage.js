@@ -39,37 +39,37 @@ const CertificatesListPage = () => {
   const toggleSortOrder = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
-
   // Filter and sort certificates
   const filteredCertificates = certificates
     .filter(cert => {
       const searchTerm = filter.toLowerCase();
       return (
         cert._id.toLowerCase().includes(searchTerm) ||
+        (cert.certificateId && cert.certificateId.toLowerCase().includes(searchTerm)) ||
         (cert.studentName && cert.studentName.toLowerCase().includes(searchTerm)) ||
+        (cert.studentEmail && cert.studentEmail.toLowerCase().includes(searchTerm)) ||
         (cert.universityName && cert.universityName.toLowerCase().includes(searchTerm)) ||
-        cert.courseName.toLowerCase().includes(searchTerm) ||
-        cert.programName.toLowerCase().includes(searchTerm)
+        (cert.universityEmail && cert.universityEmail.toLowerCase().includes(searchTerm)) ||
+        (cert.major && cert.major.toLowerCase().includes(searchTerm)) ||
+        (cert.departmentName && cert.departmentName.toLowerCase().includes(searchTerm))
       );
-    })
-    .sort((a, b) => {
+    })    .sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
         case 'dateOfIssue':
-          comparison = new Date(a.dateOfIssue) - new Date(b.dateOfIssue);
+          comparison = new Date(a.dateOfIssue || a.createdAt) - new Date(b.dateOfIssue || b.createdAt);
           break;
-        case 'courseName':
-          comparison = a.courseName.localeCompare(b.courseName);
+        case 'major':
+          comparison = (a.major || '').localeCompare(b.major || '');
+          break;
+        case 'departmentName':
+          comparison = (a.departmentName || '').localeCompare(b.departmentName || '');
           break;
         case 'studentName':
-          if (a.studentName && b.studentName) {
-            comparison = a.studentName.localeCompare(b.studentName);
-          }
+          comparison = (a.studentName || '').localeCompare(b.studentName || '');
           break;
         case 'universityName':
-          if (a.universityName && b.universityName) {
-            comparison = a.universityName.localeCompare(b.universityName);
-          }
+          comparison = (a.universityName || '').localeCompare(b.universityName || '');
           break;
         default:
           comparison = 0;
@@ -104,15 +104,15 @@ const CertificatesListPage = () => {
               </InputGroup>
             </Col>
             <Col md={6} className="d-flex justify-content-end align-items-center">
-              <Form.Label className="me-2 mb-0">Sort by:</Form.Label>
-              <Form.Select 
+              <Form.Label className="me-2 mb-0">Sort by:</Form.Label>              <Form.Select 
                 value={sortBy}
                 onChange={handleSortChange}
                 style={{ width: 'auto' }}
                 className="me-2"
               >
                 <option value="dateOfIssue">Issue Date</option>
-                <option value="courseName">Course Name</option>
+                <option value="major">Major</option>
+                <option value="departmentName">Department</option>
                 {userType === 'university' && (
                   <option value="studentName">Student Name</option>
                 )}
@@ -137,14 +137,14 @@ const CertificatesListPage = () => {
               </div>
               <p className="mt-3">Loading certificates...</p>
             </div>
-          ) : filteredCertificates.length > 0 ? (
-            <Table responsive hover className="certificate-table">
+          ) : filteredCertificates.length > 0 ? (            <Table responsive hover className="certificate-table">
               <thead>
                 <tr>
                   <th>Certificate ID</th>
                   {userType === 'university' && <th>Student</th>}
                   {userType === 'student' && <th>University</th>}
-                  <th>Course/Degree</th>
+                  <th>Major/Department</th>
+                  <th>CGPA</th>
                   <th>Issue Date</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -155,13 +155,14 @@ const CertificatesListPage = () => {
                   <tr key={cert._id}>
                     <td className="cert-id">
                       <span className="badge bg-light text-dark">
-                        {cert._id.substring(0, 8)}...
+                        {cert.certificateId || cert._id.substring(0, 8) + '...'}
                       </span>
                     </td>
-                    {userType === 'university' && <td>{cert.studentName}</td>}
-                    {userType === 'student' && <td>{cert.universityName}</td>}
-                    <td>{cert.courseName}</td>
-                    <td>{new Date(cert.dateOfIssue).toLocaleDateString()}</td>
+                    {userType === 'university' && <td>{cert.studentName || 'N/A'}</td>}
+                    {userType === 'student' && <td>{cert.universityName || 'N/A'}</td>}
+                    <td>{cert.major || cert.departmentName || 'N/A'}</td>
+                    <td>{cert.cgpa || 'N/A'}</td>
+                    <td>{new Date(cert.dateOfIssue || cert.createdAt).toLocaleDateString()}</td>
                     <td>
                       <Badge bg={cert.revoked ? 'danger' : 'success'}>
                         {cert.revoked ? 'Revoked' : 'Active'}

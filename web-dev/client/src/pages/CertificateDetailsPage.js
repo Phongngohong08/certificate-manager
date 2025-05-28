@@ -315,21 +315,19 @@ const CertificateDetailsPage = () => {
           <Card className="shadow-sm">
             <Card.Body>
               <h4>Certificate Details</h4>
-              <hr />
-              <Row>
+              <hr />              <Row>
                 <Col md={6}>
-                  <p><strong>Certificate ID:</strong> {certificate._id}</p>
-                  <p><strong>Student Name:</strong> {certificate.studentName}</p>
-                  <p><strong>University:</strong> {certificate.universityName}</p>
-                  <p><strong>Course/Degree:</strong> {certificate.courseName}</p>
-                  <p><strong>Program:</strong> {certificate.programName}</p>
+                  <p><strong>Certificate ID:</strong> {certificate.certificateId || certificate._id}</p>
+                  <p><strong>Student Name:</strong> {certificate.studentName || 'N/A'}</p>
+                  <p><strong>Student Email:</strong> {certificate.studentEmail || 'N/A'}</p>
+                  <p><strong>University:</strong> {certificate.universityName || 'N/A'}</p>
+                  <p><strong>University Email:</strong> {certificate.universityEmail || 'N/A'}</p>
                 </Col>
                 <Col md={6}>
-                  <p><strong>Date of Issue:</strong> {new Date(certificate.dateOfIssue).toLocaleDateString()}</p>
-                  {certificate.expirationDate && (
-                    <p><strong>Expiration Date:</strong> {new Date(certificate.expirationDate).toLocaleDateString()}</p>
-                  )}
-                  <p><strong>Grade:</strong> {certificate.grade}</p>
+                  <p><strong>Major/Degree:</strong> {certificate.major || 'N/A'}</p>
+                  <p><strong>Department:</strong> {certificate.departmentName || 'N/A'}</p>
+                  <p><strong>CGPA:</strong> {certificate.cgpa || 'N/A'}</p>
+                  <p><strong>Date of Issue:</strong> {new Date(certificate.dateOfIssue || certificate.createdAt).toLocaleDateString()}</p>
                   <p>
                     <strong>Status:</strong>{' '}
                     <span className={`badge bg-${certificate.revoked ? 'danger' : 'success'}`}>

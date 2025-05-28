@@ -165,8 +165,13 @@ router.get('/dashboard', authenticateJWT, async (req, res) => {
   try {
     const studentEmail = req.user.email;
     
+    // Debug logging
+    console.log('=== DEBUG DASHBOARD API ===');
+    console.log('Student email from JWT:', studentEmail);
+    
     // Get certificates for this student
     const certificates = await Certificate.find({ studentEmail: studentEmail });
+    console.log('Certificates found for dashboard:', certificates.length);
     
     // Calculate stats
     const stats = {
@@ -175,11 +180,15 @@ router.get('/dashboard', authenticateJWT, async (req, res) => {
       profileViews: 0 // Placeholder for now
     };
     
+    console.log('Dashboard stats:', stats);
+    console.log('=== END DEBUG ===');
+    
     res.json({ 
       stats: stats,
       certificates: certificates
     });
   } catch (err) {
+    console.error('Error in dashboard API:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -236,9 +245,63 @@ router.get('/certificates', authenticateJWT, async (req, res) => {
   try {
     // Get email from JWT token
     const studentEmail = req.user.email;
-    const certs = await Certificate.find({ studentEmail: studentEmail });
+    
+    // Debug logging
+    console.log('=== DEBUG CERTIFICATES API ===');
+    console.log('JWT user object:', req.user);
+    console.log('Student email from JWT:', studentEmail);
+    console.log('Student email type:', typeof studentEmail);
+    
+    // Kiểm tra tất cả certificates trước
+    const allCerts = await Certificate.find({});
+    console.log('Total certificates in DB:', allCerts.length);
+    
+    if (allCerts.length > 0) {
+      console.log('Sample certificate studentEmail:', allCerts[0].studentEmail);
+      console.log('Sample certificate studentEmail type:', typeof allCerts[0].studentEmail);
+      
+      // Kiểm tra email match
+      const emailMatches = allCerts.filter(cert => cert.studentEmail === studentEmail);
+      console.log('Email exact matches:', emailMatches.length);
+      
+      // Kiểm tra với case-insensitive
+      const emailMatchesIgnoreCase = allCerts.filter(cert => 
+        cert.studentEmail.toLowerCase() === studentEmail.toLowerCase()
+      );
+      console.log('Email case-insensitive matches:', emailMatchesIgnoreCase.length);
+      
+      // Kiểm tra với trim
+      const emailMatchesTrim = allCerts.filter(cert => 
+        cert.studentEmail.trim() === studentEmail.trim()
+      );
+      console.log('Email trim matches:', emailMatchesTrim.length);
+    }
+    
+    // Thử nhiều cách query khác nhau
+    let certs = await Certificate.find({ studentEmail: studentEmail });
+    
+    // Nếu không tìm thấy, thử với regex case-insensitive
+    if (certs.length === 0) {
+      console.log('Trying case-insensitive search...');
+      certs = await Certificate.find({ 
+        studentEmail: { $regex: new RegExp(`^${studentEmail}$`, 'i') } 
+      });
+    }
+    
+    // Nếu vẫn không tìm thấy, thử với trim
+    if (certs.length === 0) {
+      console.log('Trying trimmed search...');
+      certs = await Certificate.find({ 
+        studentEmail: { $regex: new RegExp(`^\\s*${studentEmail.trim()}\\s*$`, 'i') } 
+      });
+    }
+    
+    console.log('Certificates found for student:', certs.length);
+    console.log('=== END DEBUG ===');
+    
     res.json({ certificates: certs });
   } catch (err) {
+    console.error('Error in certificates API:', err);
     res.status(500).json({ error: err.message });
   }
 });
@@ -249,11 +312,19 @@ router.get('/certificates/:id', authenticateJWT, async (req, res) => {
     const { id } = req.params;
     const studentEmail = req.user.email;
     
+    // Debug logging
+    console.log('=== DEBUG CERTIFICATE BY ID API ===');
+    console.log('Certificate ID:', id);
+    console.log('Student email from JWT:', studentEmail);
+    
     // Find certificate by ID and ensure it belongs to this student
     const certificate = await Certificate.findOne({ 
       _id: id, 
       studentEmail: studentEmail 
     });
+    
+    console.log('Certificate found:', certificate ? 'Yes' : 'No');
+    console.log('=== END DEBUG ===');
     
     if (!certificate) {
       return res.status(404).json({ error: 'Certificate not found or access denied' });
@@ -261,6 +332,63 @@ router.get('/certificates/:id', authenticateJWT, async (req, res) => {
     
     res.json({ certificate });
   } catch (err) {
+    console.error('Error in certificate by ID API:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DEBUG API - Temporary endpoint to check data
+router.get('/debug/certificates', authenticateJWT, async (req, res) => {
+  try {
+    const studentEmail = req.user.email;
+    
+    console.log('=== FULL DEBUG ===');
+    console.log('JWT Token User:', JSON.stringify(req.user, null, 2));
+    
+    // Lấy tất cả certificates
+    const allCerts = await Certificate.find({});
+    console.log('All certificates in DB:', allCerts.length);
+    
+    // Log tất cả student emails trong DB
+    const allEmails = allCerts.map(cert => cert.studentEmail);
+    console.log('All student emails in DB:', allEmails);
+    
+    // So sánh với email từ JWT
+    console.log('JWT Email:', `"${studentEmail}"`);
+    console.log('JWT Email length:', studentEmail.length);
+    
+    // Tìm kiếm với nhiều cách
+    const exactMatch = allCerts.filter(cert => cert.studentEmail === studentEmail);
+    const trimMatch = allCerts.filter(cert => cert.studentEmail.trim() === studentEmail.trim());
+    const lowerMatch = allCerts.filter(cert => cert.studentEmail.toLowerCase() === studentEmail.toLowerCase());
+    
+    console.log('Exact matches:', exactMatch.length);
+    console.log('Trim matches:', trimMatch.length);
+    console.log('Lowercase matches:', lowerMatch.length);
+    
+    // Kiểm tra từng certificate
+    if (allCerts.length > 0) {
+      allCerts.forEach((cert, index) => {
+        console.log(`Certificate ${index + 1}:`);
+        console.log(`  Email: "${cert.studentEmail}"`);
+        console.log(`  Email length: ${cert.studentEmail.length}`);
+        console.log(`  Student Name: ${cert.studentName}`);
+        console.log(`  Match with JWT: ${cert.studentEmail === studentEmail}`);
+      });
+    }
+    
+    res.json({
+      jwtUser: req.user,
+      jwtEmail: studentEmail,
+      totalCertificates: allCerts.length,
+      allEmails: allEmails,
+      exactMatches: exactMatch.length,
+      trimMatches: trimMatch.length,
+      lowercaseMatches: lowerMatch.length,
+      certificates: allCerts
+    });
+  } catch (err) {
+    console.error('Debug API error:', err);
     res.status(500).json({ error: err.message });
   }
 });

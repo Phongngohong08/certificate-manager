@@ -15,7 +15,18 @@ const axiosInstance = axios.create({
 // Add request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // You can add custom logic here (e.g., adding auth tokens)
+    // Get token from localStorage
+    try {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);
+        if (user && user.token) {
+          config.headers.Authorization = `Bearer ${user.token}`;
+        }
+      }
+    } catch (error) {
+      console.error('Error parsing stored user:', error);
+    }
     return config;
   },
   (error) => {
@@ -34,6 +45,13 @@ axiosInstance.interceptors.response.use(
     if (error.response?.status === 401) {
       // Handle unauthorized access
       console.log('Unauthorized access');
+      // Clear user data from localStorage
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('userType');
+      // Redirect to login page if not already there
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

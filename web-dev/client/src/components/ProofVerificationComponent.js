@@ -7,7 +7,6 @@ const ProofVerificationComponent = () => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
-
   const handleVerifyProof = async () => {
     if (!proofData.trim()) {
       setError('Please enter proof data');
@@ -26,7 +25,30 @@ const ProofVerificationComponent = () => {
         throw new Error('Invalid proof format. Missing required fields: certUUID, disclosedData, or proof');
       }
 
-      const { data } = await axiosInstance.post('verify/verify', parsedProof);
+      // If proof is a string, try to parse it
+      let finalProof = parsedProof.proof;
+      if (typeof finalProof === 'string') {
+        try {
+          finalProof = JSON.parse(finalProof);
+        } catch (e) {
+          // If parsing fails, keep as string (let backend handle it)
+          console.log('Proof is already a string, sending as-is');
+        }
+      }
+
+      const verifyData = {
+        ...parsedProof,
+        proof: finalProof
+      };
+
+      console.log('Sending verification data:', {
+        certUUID: verifyData.certUUID,
+        disclosedDataKeys: Object.keys(verifyData.disclosedData),
+        proofType: typeof verifyData.proof,
+        proofKeys: typeof verifyData.proof === 'object' ? Object.keys(verifyData.proof) : 'string'
+      });
+
+      const { data } = await axiosInstance.post('verify/verify', verifyData);
       setResult(data);
     } catch (error) {
       if (error.name === 'SyntaxError') {
@@ -73,20 +95,20 @@ const ProofVerificationComponent = () => {
           <Form.Label>Proof Data (JSON)</Form.Label>
           <Form.Control
             as="textarea"
-            rows={8}
-            placeholder={`{
-  "certUUID": "certificate-id",
+            rows={8}            placeholder={`{
+  "certUUID": "certificate-id-here",
   "disclosedData": {
     "studentName": "John Doe",
-    "major": "Computer Science"
+    "major": "Computer Science",
+    "cgpa": "3.8"
   },
   "proof": {
-    "proofHash": "...",
-    "merkleRoot": "...",
-    "nonce": "...",
+    "proofHash": "abc123...",
+    "merkleRoot": "def456...",
+    "nonce": "ghi789...",
     "timestamp": 1234567890,
-    "certificateId": "...",
-    "selectedAttributes": ["studentName", "major"],
+    "certificateId": "certificate-id-here",
+    "selectedAttributes": ["studentName", "major", "cgpa"],
     "status": "valid"
   }
 }`}

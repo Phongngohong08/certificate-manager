@@ -62,9 +62,18 @@ router.get('/generateProof', async (req, res) => {
     const attrs = Array.isArray(sharedAttributes) ? sharedAttributes : sharedAttributes.split(',');
     const cert = await Certificate.findById(certUUID);
     if (!cert) return res.status(404).json({ error: 'Không tìm thấy chứng chỉ' });
+    
     // Lấy proof từ blockchain (giả lập)
-    const proof = await fabric.queryChaincode(email, 'generateCertificateProof', [JSON.stringify({ sharedAttributes: attrs, certUUID, email })]);
-    // Lấy dữ liệu đã chọn
+    const proofString = await fabric.queryChaincode(email, 'generateCertificateProof', [JSON.stringify({ sharedAttributes: attrs, certUUID, email })]);
+    
+    // Parse proof string thành object
+    let proof;
+    try {
+      proof = JSON.parse(proofString);
+    } catch (e) {
+      proof = proofString; // Nếu không parse được thì giữ nguyên
+    }
+      // Lấy dữ liệu đã chọn
     const disclosedData = attrs.reduce((obj, key) => { obj[key] = cert[key]; return obj; }, {});
     res.json({ proof, disclosedData, certUUID });
   } catch (err) {

@@ -49,6 +49,12 @@ router.post('/verify', async (req, res) => {
   try {
     const { certUUID, disclosedData, proof } = req.body;
     
+    console.log('=== Verify Request Debug ===');
+    console.log('certUUID:', certUUID);
+    console.log('disclosedData:', disclosedData);
+    console.log('proof type:', typeof proof);
+    console.log('proof:', proof);
+    
     if (!certUUID || !disclosedData || !proof) {
       return res.status(400).json({ 
         verified: false, 
@@ -61,20 +67,30 @@ router.post('/verify', async (req, res) => {
       certUUID,
       disclosedData: Object.keys(disclosedData),
       proof: typeof proof === 'string' ? 'string' : Object.keys(proof)
-    });
-    
+    });    
     // Gọi chaincode để xác thực proof
-    const result = await fabric.queryChaincode(
-      'admin',
-      'verifyCertificateProof',
-      [JSON.stringify({ certUUID, disclosedData, proof })]
-    );
+    let result;
+    try {
+      result = await fabric.queryChaincode(
+        'admin',
+        'verifyCertificateProof',
+        [JSON.stringify({ certUUID, disclosedData, proof })]
+      );
+    } catch (fabricError) {
+      console.log('Fabric verification failed, trying local verification:', fabricError.message);
+      
+      // Fallback to local proof verification
+      const proofService = require('../services/proof-service');
+      const isValid = await proofService.verifyCertificateProof(proof, disclosedData);
+      result = isValid ? 'true' : 'false';
+    }
     
-    const verified = result === 'true';
+    const verified = result === 'true' || result === true;
     
     res.json({ 
       verified,
       certUUID,
+      disclosedData: verified ? disclosedData : undefined,
       message: verified ? 'Certificate is authentic' : 'Certificate verification failed'
     });
   } catch (err) {

@@ -53,4 +53,4 @@ Trước khi chạy backend, bạn cần enroll admin để tạo danh tính và
    ```
    Nếu thành công sẽ xuất hiện thông báo: `Enroll admin thành công và đã lưu vào wallet!`
 
-Nếu không thực hiện bước này, backend sẽ báo lỗi: `Identity for user admin@hust.edu.vn not found in wallet` khi truy cập blockchain.
+Nếu không thực hiện bước này, backend sẽ báo lỗi: `Identity for user admin` khi truy cập blockchain.

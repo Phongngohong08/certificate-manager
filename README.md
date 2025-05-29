@@ -1,6 +1,6 @@
 # Blockchain Academic Certificates
 
-Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric 2.2.19.
+Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric v2.5.12.
 
 ## Yêu cầu hệ thống
 
@@ -8,7 +8,7 @@ Dự án này triển khai một hệ thống quản lý chứng chỉ học thu
 - Node.js phiên bản 20.x trở lên
 - MongoDB phiên bản 6.0 trở lên
 - Docker và Docker Compose
-- Hyperledger Fabric 2.2.19
+- Hyperledger Fabric v2.5.12
 - Go phiên bản 1.20 trở lên
 
 ## Cài đặt các công cụ cần thiết
@@ -66,6 +66,8 @@ curl -sSLO https://raw.githubusercontent.com/hyperledger/fabric/main/scripts/ins
 - To pull the Docker containers and clone the samples repo, run one of these commands for example
 ```bash
 ./install-fabric.sh docker samples binary
+# hoặc (mình đã chạy ổn định ở version này, có thể chỉ ra phiên bản cụ thể khi cài đặt)
+./install-fabric.sh --fabric-version 2.5.12 binary
 ```
 
 - Refer `https://hyperledger-fabric.readthedocs.io/en/release-2.5/install.html`

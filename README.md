@@ -1,6 +1,6 @@
 # Blockchain Academic Certificates
 
-Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric v2.5.12.
+Dự án này triển khai một hệ thống quản lý chứng chỉ học thuật dựa trên blockchain sử dụng Hyperledger Fabric.
 
 ## Yêu cầu hệ thống
 
@@ -10,6 +10,16 @@ Dự án này triển khai một hệ thống quản lý chứng chỉ học thu
 - Docker và Docker Compose
 - Hyperledger Fabric v2.5.12
 - Go phiên bản 1.20 trở lên
+
+```bash
+# Phiên bản ubuntu mình đã dùng và chạy ổn định
+phongnh@ubuntu:~$ lsb_release -a
+No LSB modules are available.
+Distributor ID:	Ubuntu
+Description:	Ubuntu 22.04.5 LTS
+Release:	22.04
+Codename:	jammy
+```
 
 ## Cài đặt các công cụ cần thiết
 
